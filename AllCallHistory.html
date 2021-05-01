@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html>
+  <style>
+    body {background-color: #d8f3ec;}
+    #searchBox {padding: 5px; border: 1px solid #006b51; width: 250px}
+    .buttonlink {
+      background-color: #00b388;
+      font-weight: bold;
+      color: white;
+      padding: 1px 5px 1px 5px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .buttonlink:hover, .buttonlink:active {
+      background-color: #d8f3ec;
+      font-weight: bold;
+      color: #006b51;
+      padding: 1px 5px 1px 5px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .highlightbutton, .autosearchbutton {
+      background-color: #00b388;
+      font-weight: bold;
+      color: white;
+      padding: 5px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      border-radius: 5px;
+      outline: 0;
+      border: 0px;
+    }
+    .highlightbutton:hover, .autosearchbutton:hover {
+      background-color: #006b51;
+      cursor: pointer;
+    }
+    .toggle {
+      background: orange;
+      color: white;
+    }
+  </style>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script>
+    /*
+    * Function that highlights text within the call search results.
+    */
+    function highlightText() {
+      var td, text;
+
+      // Determine whether something is currently highlighted or not
+      var highlight = document.getElementById("highlight").value;
+
+      // Get the text we want to search
+      var searchTextBox = document.getElementById("searchBox");
+      var searchText = searchTextBox.value.toUpperCase();
+
+      // Do not do anything if search text is empty
+      if (searchText.length == 0 && highlight != "Highlight (Off)") {
+        return;
+      }
+
+      // Get the call result rows where we want to search for the text
+      var callHistory = document.getElementById("callHistory");
+      var tr = callHistory.getElementsByClassName("callData");
+
+      // For every call result row...
+      for (var i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[0];
+        if (td) {
+          text = td.textContent || td.innerText;
+
+          // If we find the text we want to highlight...
+          if (text.toUpperCase().indexOf(searchText) > -1) {
+            var pre = td.getElementsByTagName("pre")[0];
+
+            // If nothing is highlighted yet...
+            if (highlight == "Highlight") {
+              // Highlight the text by wrapping it with a <span> element
+              pre.innerHTML = pre.innerHTML.replace(new RegExp(searchText, "gi"), function (match) {
+                return '<span class="toggle" style="display: inline;">' + match + "</span>";
+              });
+
+            // ...else, something is already highlighted...
+            } else {
+              // Remove the highlight by removing the <span> element surrounding the text
+              var str = pre.innerHTML.replace(/<span class="toggle" style="display: inline;">/gi, "");
+              str.replace(/<\/span>/gi, "");
+              pre.innerHTML = str;
+            }
+          }
+        }
+      }
+
+      // If nothing is highlighted yet...
+      if (highlight == "Highlight") {
+        // Run a toggle animation on all the text that we would like to highlight
+        $( ".toggle" ).toggle("highlight");
+        $( ".toggle" ).toggle("highlight");
+
+        // Change the style of the highlight button
+        document.getElementById("highlight").value = "Highlight (Off)";
+        document.getElementById("highlight").style.backgroundColor = "#006b51";
+
+      // ... else, something is already highlighted...
+      } else {
+        // Change the style of the highlight button
+        document.getElementById("highlight").value = "Highlight";
+        document.getElementById("highlight").style.backgroundColor = "";
+      }
+    }
+
+    /*
+    * Function that turns on/off the ability for user to highlight text within the call
+    * results table and auto-copy it to the search box for streamlined searching.
+    */
+    function autoSearch() {
+      var autosearch = document.getElementById("autosearch").value;
+
+      // If auto-search is currently enabled...
+      if (autosearch == "Auto-Search (Off)") {
+        // Disable it and change the style of the auto-search button
+        document.getElementById('callHistory').removeEventListener('mouseup', copyToSearch, false);
+        document.getElementById("autosearch").value = "Auto-Search";
+        document.getElementById("autosearch").style.backgroundColor = "";
+
+      // ... else, auto-search is currently disabled...
+      } else {
+        // Enable it and change the style of the auto-search button
+        document.getElementById('callHistory').addEventListener('mouseup', copyToSearch, false);
+        document.getElementById("autosearch").value = "Auto-Search (Off)";
+        document.getElementById("autosearch").style.backgroundColor = "#006b51";
+      }
+    }
+
+
+    /*
+    * Function that copies highlighted text to the search box automatically.
+    */
+    function copyToSearch(e) {
+      var text = (document.all) ? document.selection.createRange().text : document.getSelection();
+
+      if (text.toString().length != 0) {
+        document.getElementById("searchBox").value = text.toString();
+        filterSearch();
+      }
+    }
+
+
+    /*
+    * Function that hides information from the call history depending on the text being searched
+    */
+    function filterSearch() {
+      var td, text;
+
+      // If text is currently highlighted, remove the highlighted text
+      var highlight = document.getElementById("highlight").value;
+      if (highlight == "Highlight (Off)") {
+        highlightText();
+      }
+
+      // Get the text we want to search
+      var searchTextBox = document.getElementById("searchBox");
+      var searchText = searchTextBox.value.toUpperCase();
+
+      // Get the rows where we want to dynamically hide depending on the text being searched
+      var callHistory = document.getElementById("callHistory");
+      var tr = callHistory.getElementsByClassName("callData");
+
+      // Counter to keep track of how many calls will remain after the search
+      var counter = 0;
+
+      // Find all the elements that are recordings/voicemails
+      var regex = /^[0123456789]{6,}$/;
+      var mp3_output = [];
+      for (let i of document.querySelectorAll('*')) {
+        for (let j of i.attributes) {
+          if (regex.test(j.value)) {
+            mp3_output.push({'element': i});
+          }
+        }
+      }
+
+      // Hide all the elements that are recordings/voicemails and only show them if they are part
+      // of a call that matches the search
+      for (var i = 0; i < mp3_output.length; i++) {
+        td = mp3_output[i].element.getElementsByTagName("td")[0];
+        if (td) {
+          mp3_output[i].element.style.display = "none";
+        }
+      }
+
+      // For each row...
+      for (var i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[0];
+        if (td) {
+          text = td.textContent || td.innerText;
+          // If we find the text we want to search...
+          if (text.toUpperCase().indexOf(searchText) > -1) {
+            tr[i].style.display = "";
+            counter++;
+
+            // Get the ID of the call we are on
+            var call_info = JSON.parse(td.innerText);
+            var mp3_tr = callHistory.getElementsByClassName(call_info.id.toString());
+
+            // Show all the recordings/voicemails related to this call
+            for (var j = 0; j < mp3_tr.length; j++) {
+              var mp3_td = mp3_tr[j].getElementsByTagName("td")[0];
+              if (mp3_td) {
+                mp3_tr[j].style.display = "";
+              }
+            }
+
+          // ..., else if we did not find the text...
+          } else {
+            var pre = td.getElementsByTagName("pre")[0];
+            // If this row has highlighted text...
+            if (pre) {
+              // Remove the highlight by removing the <span> element surrounding the text
+              var str = pre.innerHTML.replace(/<span class="toggle" style="display: inline;">/gi, "");
+              str.replace(/<\/span>/gi, "");
+              pre.innerHTML = str;
+            }
+
+            tr[i].style.display = "none";
+          }
+        }
+      }
+
+      // Retrieve the current number of calls being shown
+      var total_str = document.getElementById("callcount").textContent;
+
+      // Variable to keep track of total number of calls (even before
+      // the results are filtered by the dynamic search box)
+      var total_num_calls;
+
+      // If the current number of calls being shown is already dynamically filtered...
+      if (total_str.includes("Showing")) {
+        //  Retrieve the total number of calls from the current string
+        total_num_calls = total_str.substring((total_str.indexOf("/ ")+2),
+          total_str.indexOf(" rows"));
+
+      // ..., else the current number of calls has not yet been dynamically filtered...
+      } else {
+        // Retrieve the total number of calls from the current string
+        total_num_calls = total_str.substring((total_str.indexOf(": ")+2),
+          total_str.indexOf(" rows"));
+      }
+
+      // If the dynamic search box is empty...
+      if (!searchText.length) {
+        // Show the standard string displaying the total number of calls (no dynamically filtered)
+        // results
+        document.getElementById("callcount").textContent = "Total: " +
+          total_num_calls + " rows";
+
+      // ..., else the user has typed in a keyword to search using the dynamic search box...
+      } else {
+        // Display how many calls are being shown as a result of the dynamic search filter vs. the
+        // total number of calls (if there was no dynamic search filter)
+        document.getElementById("callcount").textContent = "Showing: " +
+          counter + " / " + total_num_calls + " rows";
+      }
+    }
+  </script>
+  <input type="text" id="searchBox" onkeyup="filterSearch()" placeholder="Search for keywords..">
+  <br><br>
+  <input type="button" class="highlightbutton" id="highlight" value="Highlight" onclick="highlightText()" />
+  <input type="button" class="autosearchbutton" id="autosearch" value="Auto-Search" onclick="autoSearch()" />
+  <br><br><br>
+  <div id="callcount"
+  style="font-family:arial; font-style: italic; font-size: 12px; padding: 0px 0px 10px 3px"></div>
+  <table id="callHistory" style="width: 100%">
+    <?
+      // Get the API key
+      var cache = PropertiesService.getScriptProperties();
+      const api_key = cache.getProperty("api_key");
+
+      // Need to define special ID for users with no Aircall team
+      const NO_TEAM = "999999999"
+
+      // Create a JSON object which will keep track of which Aircall users belong
+      // to which Aircall teams
+      // Structure: {
+      //  "User ID 1": {
+      //    "Team ID A": "Team Name A",
+      //    "Team ID B": "Team Name B",
+      //    ...
+      //  },
+      //  "User ID 2": {
+      //    "Team ID C": "Team Name C",
+      //    "Team ID D": "Team Name D",
+      //    ...
+      //  }
+      //  ...
+      // }
+      var teamsdb = JSON.parse(cache.getProperty("teams_cache_db"));
+      var filtered_teams = JSON.parse(cache.getProperty("filteredteams_cache_db"));
+
+      // If there exists a team filter...
+      if (filtered_teams) {
+
+        // Create a JSON object which will contain the mappings between User ID and Phone Numbers
+        // Structure: {
+        //  "User ID 1": {
+        //    "Phone Number ID A": "Phone Number Name A",
+        //    "Phone Number ID B": "Phone Number Name B",
+        //    ...
+        //   },
+        //  "User ID 2": {
+        //    "Phone Number ID G": "Phone Number Name G",
+        //    "Phone Number ID H": "Phone Number Name H",
+        //    ...
+        //   },
+        //  ...
+        // }
+        var user_numberdb = {};
+
+
+        // From the "UserDB" sheet, collect all the Aircall user info to keep track of mappings
+        // between User ID and Username
+        userdb_sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("UserDB");
+        var userdb_data = userdb_sheet.getDataRange().getValues();
+
+        // For every Aircall user...
+        for (var i = 0; i < userdb_data.length; i++) {
+          var userid = userdb_data[i][0];
+
+          // If user is part of an Aircall team...
+          if (teamsdb[userid]) {
+
+            // Get the list of all teams this Aircall user belongs to...
+            var user_teams = Object.keys(teamsdb[userid]);
+
+            // For each Aircall team...
+            user_teams.forEach(function (teamid) {
+
+              // If this user is part of a team included in the team filter...
+              if (filtered_teams[teamid]) {
+
+                // If we know which phone numbers this user is assigned to...
+                if (userdb_data[i][2]) {
+                  // Convert the string into a list of phone numbers (delimited by the ";" character)
+                  var numbers = userdb_data[i][2].split(";");
+
+                  user_numberdb[userdb_data[i][0].toString()] = {};
+
+                  // For each phone number...
+                  for (var n = 0; n < numbers.length; n++) {
+                    // Keep track of it for this user
+                    user_numberdb[userdb_data[i][0].toString()][numbers[n].split(":")[0]] = numbers[n].split(":")[1];
+                  }
+                }
+              }
+            });
+
+          // ...else, user is not part of an Aircall team...
+          } else {
+
+            // If all single users have been included in the team filter...
+            if (filtered_teams[NO_TEAM]) {
+              // Convert the string into a list of phone numbers (delimited by the ";" character)
+              var numbers = userdb_data[i][2].split(";");
+
+              user_numberdb[userdb_data[i][0].toString()] = {};
+
+              // For each phone number...
+              for (var n = 0; n < numbers.length; n++) {
+                // Keep track of it for this user
+                user_numberdb[userdb_data[i][0].toString()][numbers[n].split(":")[0]] = numbers[n].split(":")[1];
+              }
+            }
+          }
+        }
+      }
+
+      // Variable to keep track of time limit a recording/voicemail is generally available for
+      const AVAIL_TIME_LIMIT = 9;
+
+      // Set headers and parameters for any future Aircall API calls
+      var headers = {
+        "Authorization" : "Basic " + api_key
+      };
+      var get_params = {
+        "method":"GET",
+        "headers":headers
+      };
+
+      // Convert current time and [current time - live feed interval period] to
+      // UNIX epoch format
+      var currtime = parseInt((new Date().getTime())/1000);
+      var mins_before_currtime = parseInt(currtime - (15 * 60));
+      var fetch_nextpage = true;
+
+      // Define the url for the Aircall Calls API call
+      var calls_url = "https://api.aircall.io/v1/calls?order=desc&per_page=50&from=" + mins_before_currtime.toString() +
+        "&to=" + currtime.toString();
+
+      var avail_pagenum = 1;
+
+      // While there is still at least one page to review for Aircall call information
+      // (pagination)...
+      while (fetch_nextpage) {
+        // Make the Aircall Calls API call and parse the response
+        var calls_response = UrlFetchApp.fetch(calls_url, get_params);
+        var calls_json = calls_response.getContentText();
+        var calls_data = JSON.parse(calls_json);
+
+        // For each call... (display in in the HTML page)
+        for (var i = 0; i < calls_data.calls.length; i++) {
+
+          // We will need to keep track of whether the user involved with this call
+          // is relevant (either because there is no team filter so all users are relevant,
+          // or because there is a team filter and this user is part of a team included
+          // in the filter)
+          var relevant_user = false;
+
+          // We will also need to keep track of whether a missed call (which has no associated
+          // user) is relevant (because the call was missed on a phone number on which a user
+          // is assigned to, and this user is part of a team that is included in the team filter
+          // if one is set)
+          var missed_found = false;
+
+          // If there is a team filter...
+          if (filtered_teams) {
+
+            // If there is a user involved with the call...
+            if (calls_data.calls[i].user) {
+
+              // If this user is part of any Aircall team...
+              if (teamsdb[calls_data.calls[i].user.id]) {
+
+                // Get the list of all Aircall teams assigned to this user
+                var user_teams = Object.keys(teamsdb[calls_data.calls[i].user.id]);
+
+                // For each team...
+                for (var k = 0; k < user_teams.length; k++) {
+
+                  // If this user is part of a team included in the team filter...
+                  if (filtered_teams[user_teams[k]]) {
+                    // Keep track that this user is relevant
+                    relevant_user = true;
+                    break;
+                  }
+                }
+
+              // ...else, this user is not part of an Aircall team...
+              } else {
+                // If either there is no team filter, or if there is a team filter
+                // and all single users have been included in the filter...
+                if (!filtered_teams || (filtered_teams && filtered_teams[NO_TEAM])) {
+                  // Keep track that this user is relevant
+                  relevant_user = true;
+                }
+              }
+            }
+
+            // If there is no user involved with the call and the call is missed...
+            if (calls_data.calls[i].missed_call_reason) {
+              // Get the list of all Aircall users and their assigned phone numbers
+              var users_with_numbers = Object.keys(user_numberdb);
+
+              // For each Aircall user...
+              for (var k = 0; k < users_with_numbers.length; k++) {
+
+                // If this user is assigned to this phone number that missed the call...
+                if (user_numberdb[users_with_numbers[k]][calls_data.calls[i].number.id]) {
+                  // Keep track of this call as relevant
+                  missed_found = true;
+                  break;
+                }
+              }
+            }
+
+          // ...else, there is no team filter
+          } else {
+
+            // In this case, we assume every user/call is relevant
+            relevant_user = true;
+          }
+
+          // If either the user is relevant, or the call which was missed is relevant...
+          if (missed_found || relevant_user) {
+
+            // Get the recording and voicemail weblinks
+            var recording = calls_data.calls[i].recording;
+            var voicemail = calls_data.calls[i].voicemail;
+
+            // Get the current length of time between now and when the call ended
+            var avail_time = Number.MAX_SAFE_INTEGER;
+            if (calls_data.calls[i].ended_at) {
+              avail_time = ((parseInt((new Date().getTime())/1000) -
+                calls_data.calls[i].ended_at)/60).toFixed(2);
+            }
+    ?>
+    <tr bgcolor="#006b51">
+      <td style="font-family:arial; color:white; font-size:12px; padding:5px">
+        <b>Call ID <?= calls_data.calls[i].id ?>&nbsp;&nbsp;&nbsp;&nbsp;</b>
+    <?
+            if (calls_data.calls[i].asset) {
+    ?>
+        <a href=<?= calls_data.calls[i].asset ?> class="buttonlink" target="_blank" >Asset</a>
+    <?
+            }
+    ?>
+      </td>
+    </tr>
+    <?
+            // If we are below the time limit a voicemail/recording is usually available for,
+            // there exists a weblink for either a voicemail or recording...
+            if ((avail_time < AVAIL_TIME_LIMIT) && (recording || voicemail)) {
+              if (recording) {
+    ?>
+    <tr bgcolor="#00b388" class=<?= calls_data.calls[i].id ?>>
+      <td style="font-family:arial; color:white; font-size:11px; padding:5px"><b>Recording</b></td>
+    </tr>
+    <tr class=<?= calls_data.calls[i].id ?>>
+      <td style="padding: 5px">
+        <audio controls style="height: 25px">
+          <source src=<?= recording ?> type="audio/mpeg"/>
+        </audio>
+      </td>
+    </tr>
+    <?
+              }
+              if (voicemail) {
+    ?>
+    <tr bgcolor="#00b388" class=<?= calls_data.calls[i].id ?>>
+      <td style="font-family:arial; color:white; font-size:11px; padding:5px"><b>Voicemail</b></td>
+    </tr>
+    <tr class=<?= calls_data.calls[i].id ?>>
+      <td style="padding: 5px">
+        <audio controls style="height: 25px">
+          <source src=<?= voicemail ?> type="audio/mpeg"/>
+        </audio>
+      </td>
+    </tr>
+    <?
+              }
+            }
+    ?>
+    <tr class="callData">
+      <td style="font-size:11px; color:#006b51;">
+        <pre><?= JSON.stringify(calls_data.calls[i], undefined, 2) ?></pre>
+      </td>
+    </tr>
+    <?
+          }
+        }
+
+        // Determine if we need to iterate through other pages of results from the API call...
+        if (calls_data.meta.next_page_link) {
+          avail_pagenum++;
+          calls_url = "https://api.aircall.io/v1/calls?order=desc&per_page=50&page=" + avail_pagenum.toString() +
+          "&from=" + mins_before_currtime.toString() + "&to=" + currtime.toString();
+          //calls_url = calls_data.meta.next_page_link;
+        } else {
+          fetch_nextpage = false;
+        }
+      }
+    ?>
+  </table>
+  <script>
+    // Once the sidebar webpage has finished loading, call this function
+    document.addEventListener("DOMContentLoaded", function(event) {
+      // Determine the number of rows in the results table
+      var callHistory = document.getElementById("callHistory");
+      var tr = callHistory.getElementsByClassName("callData");
+
+      // Display the total number of calls in result summary at the top of the page
+      var totalcalls = tr.length;
+      document.getElementById("callcount").display = "";
+      document.getElementById("callcount").textContent = "Total: " + totalcalls + " rows";
+    });
+  </script>
+</html>

@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/js/select2.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+    <style>
+      body {background-color: #d8f3ec;}
+      pre {
+        font-family: monospace;
+        font-size: 11px;
+        color: #006b51;
+        font-style: normal;
+        font-variant: normal;
+        font-weight: 400;
+        line-height: 14px;
+      }
+      #searchBox {
+        padding: 5px;
+        border: 1px solid #006b51;
+        width: 250px;
+        height: 30px;
+        font-size: 13px;
+        font-family: arial;
+      }
+      .highlightbutton, .autosearchbutton {
+      background-color: #00b388;
+      font-weight: bold;
+      font-size: 13px;
+      color: white;
+      padding: 5px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      border-radius: 5px;
+      outline: 0;
+      border: 0px;
+      }
+      .highlightbutton:hover, .autosearchbutton:hover {
+        background-color: #006b51;
+        cursor: pointer;
+      }
+      .toggle {
+        background: orange;
+        color: white;
+      }
+      .buttonlink {
+        background-color: #00b388;
+        color: white;
+        padding: 1px 5px 1px 5px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .buttonlink:hover, .buttonlink:active {
+        background-color: #d8f3ec;
+        color: #006b51;
+        padding: 1px 5px 1px 5px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.2s ease-out;
+      }
+      .content_options {
+        max-height: 0;
+        overflow: auto;
+        transition: max-height 0.2s ease-out;
+      }
+      .inputbox {
+        width: 100%;
+        height: 30px;
+        font-size: 13px;
+        padding: 5px;
+        border-radius: 5px;
+        border: 1px solid #aaaaaa;
+        outline: 0
+      }
+      .header:hover{
+        background-color: #d8f3ec;
+        cursor: pointer;
+      }
+      .header_options:hover {
+        background-color: #d8f3ec;
+        cursor: pointer;
+      }
+      .required{color: #FF0000;}
+      .button {
+        background-color: #006b51;
+        border: none;
+        color: white;
+        padding: 7px 7px 7px 7px;
+        text-align: center;
+        font-size: 14px;
+        border-radius: 5px;
+        width: 100%;
+        margin: 0 auto;
+        display: block;
+        outline: none;
+      }
+      .select2-dropdown {
+      	background-color: #00b388;
+      	border: 1px solid #aaa;
+	      border-radius: 4px;
+	      box-sizing: border-box;
+	      display: block;
+	      position: absolute;
+	      left: -100000px;
+	      width: 100%;
+	      z-index: 1051;
+        color: white;
+        font-size: 14px
+      }
+
+      .select2-container--default .select2-selection--single {
+        background-color: #fff;
+        border: 1px solid #aaa;
+        border-radius: 4px;
+        font-size: 14px;
+        outline: 0;
+      }
+      .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #00b388;
+        border: 1px solid #006b51;
+        border-radius: 4px;
+        cursor: default;
+        float: left;
+        margin-right: 5px;
+        margin-top: 5px;
+        padding: 0 5px;
+        font-size: 14px;
+        color: white;
+      }
+      .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        color: white;
+        cursor: pointer;
+        display: inline-block;
+        font-weight: bold;
+        margin-right: 2px
+      }
+      .select2-container--default.select2-container--focus .select2-selection--multiple {
+        border: solid #00b388 1px;
+        outline: 0
+      }
+      .select2-container--default .select2-results__option[aria-selected=true] {
+	      background-color: #006b51
+      }
+      .select2-container--default .select2-results__option--highlighted[aria-selected] {
+	      background-color: #d8f3ec;
+	      color: #00b388;
+        font-weight: bold;
+      }
+      .flatpickr-calendar {
+        width: 100%
+      }
+      .flatpickr-day.today {
+	      border-color: #d8f3ec;
+        background: #d8f3ec
+      }
+      .flatpickr-day.today:hover,
+      .flatpickr-day.today:focus {
+	      border-color: #00b388;
+	      background: #00b388;
+	      color: #ffffff
+      }
+      .flatpickr-day.selected,
+      .flatpickr-day.startRange,
+      .flatpickr-day.endRange,
+      .flatpickr-day.selected.inRange,
+      .flatpickr-day.startRange.inRange,
+      .flatpickr-day.endRange.inRange,
+      .flatpickr-day.selected:focus,
+      .flatpickr-day.startRange:focus,
+      .flatpickr-day.endRange:focus,
+      .flatpickr-day.selected:hover,
+      .flatpickr-day.startRange:hover,
+      .flatpickr-day.endRange:hover,
+      .flatpickr-day.selected.prevMonthDay,
+      .flatpickr-day.startRange.prevMonthDay,
+      .flatpickr-day.endRange.prevMonthDay,
+      .flatpickr-day.selected.nextMonthDay,
+      .flatpickr-day.startRange.nextMonthDay,
+      .flatpickr-day.endRange.nextMonthDay {
+        background: #00b388;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+        color: #fff;
+        border-color: #00b388
+      }
+      .flatpickr-day.inRange,
+      .flatpickr-day.prevMonthDay.inRange,
+      .flatpickr-day.nextMonthDay.inRange,
+      .flatpickr-day.today.inRange,
+      .flatpickr-day.prevMonthDay.today.inRange,
+      .flatpickr-day.nextMonthDay.today.inRange,
+      .flatpickr-day:hover,
+      .flatpickr-day.prevMonthDay:hover,
+      .flatpickr-day.nextMonthDay:hover,
+      .flatpickr-day:focus,
+      .flatpickr-day.prevMonthDay:focus,
+      .flatpickr-day.nextMonthDay:focus {
+        cursor: pointer;
+        outline: 0;
+        background: #00b388;
+        border-color: #00b388;
+        color: white
+      }
+      .flatpickr-time input:hover,
+      .flatpickr-time .flatpickr-am-pm:hover,
+      .flatpickr-time input:focus,
+      .flatpickr-time .flatpickr-am-pm:focus {
+	      background: #d8f3ec
+      }
+      .flatpickr-current-month .flatpickr-monthDropdown-months:hover {
+        background: #d8f3ec
+      }
+      .numInputWrapper:hover {
+	      background: #d8f3ec
+      }
+      .flatpickr-months .flatpickr-prev-month:hover svg,
+      .flatpickr-months .flatpickr-next-month:hover svg {
+	      fill: #00b388
+      }
+      .flatpickr-day.inRange {
+        border-radius: 0;
+        -webkit-box-shadow: -5px 0 0 #00b388, 5px 0 0 #00b388;
+        box-shadow: -5px 0 0 #00b388, 5px 0 0 #00b388
+      }
+
+    </style>
+    <script>
+      // Global variable to keep track of when the search results have been
+      // filtered and organized for display
+      var results_finished;
+
+      /*
+      * Function that triggers the Aircall API call to search for calls during a
+      * specific activity period.
+      */
+      function searchAdvanced() {
+        // Hide the dynamic text search box until the results are finished for display
+        document.getElementById("searchBox").style.display = "none";
+
+        // Hide the highlight and autosearch options, as well as turn them off if
+        // currently enabled
+        document.getElementById("highlight").style.display = "none";
+        document.getElementById("autosearch").style.display = "none";
+
+        var highlight = document.getElementById("highlight").value;
+        if (highlight == "Highlight (Off)") {
+          highlightText();
+        }
+
+        var autosearch = document.getElementById("autosearch").value;
+        if (autosearch == "Auto-Search (Off)") {
+          document.getElementById('callHistory').removeEventListener('mouseup', copyToSearch, false);
+          document.getElementById("autosearch").value = "Auto-Search";
+          document.getElementById("autosearch").style.backgroundColor = "#00b388";
+        }
+
+        // Empty the search box in case there is leftover text from previous search
+        document.getElementById("searchBox").value = "";
+
+        // If results have been displayed from a previous search, remove them from the sidebar
+        if (document.getElementById("callHistory")) {
+          document.getElementById("callHistory").remove();
+        }
+
+        results_finished = 0;
+
+        // Ensure that at least a start and end date have been chosen for the
+        // activity period...
+        if (selected_dates.selectedDates[0] && selected_dates.selectedDates[1]) {
+          // Convert the dates into epoch UNIX time
+          var start_date = selected_dates.selectedDates[0].getTime()/1000;
+          var end_date = selected_dates.selectedDates[1].getTime()/1000;
+
+          // Call async server-side function to retrieve the results from the API call
+          google.script.run.withSuccessHandler(onSuccess).getAdvancedSearchCalls(start_date, end_date);
+
+          // Minimize the search parameters while we wait for the results
+          collapseSearch();
+
+          // Prepare the part of page where we will display search result count summary
+          document.getElementById("callcount").textContent = "";
+          document.getElementById("callcount").display = "none";
+
+          // Call function to constantly update the waiting time on page so that user understands
+          // something is happening in the background (instead of believing the page froze)
+          pollResults(0);
+
+        // ... else, ask user to make sure to choose a start and end date for the activity period
+        } else {
+          document.getElementById("resultstatus").textContent = "Please select an activity period " +
+            "(start date and end date) before continuing.";
+        }
+      }
+
+
+      /*
+      * Function that updates the waiting time on the page while the user waits for Aircall
+      * API call to search for calls during a specific activity period.
+      */
+      function pollResults (n) {
+        // If the results have not yet been displayed...
+        if (!results_finished) {
+          document.getElementById("resultstatus").textContent = "Waiting response for " +
+            n + " seconds...";
+
+          // Go to sleep for 5 seconds and check again
+          setTimeout(pollResults, 5000, (n+5));
+        }
+      }
+
+
+      /*
+      * Success handler that gets run when results from the Aircall API call (to search for
+      * calls within an activity period) is returned back to us. Before any changes are
+      * made to the sidebar, the entire function must complete (not asynchronous).
+      *   @param  {String} response_data     Either a failure message or an array of JSON
+      *                                      responses (in String format) sent from the
+      *                                      earlier Aircall API call
+      */
+      function onSuccess(response_data) {
+        // If we did not successfully retrieve results from the Aircall API call...
+        if ((typeof response_data) == "string") {
+          // Display the message in the sidebar
+          document.getElementById("resultstatus").textContent = response_data;
+
+        // ..., else, we successfully received results...
+        } else {
+          // Display the dynamic search box
+          document.getElementById("resultstatus").textContent = "";
+          document.getElementById("searchBox").style.display = "";
+
+          document.getElementById("autosearch").style.display = "";
+          document.getElementById("highlight").style.display = "";
+
+          // Create a counter to keep track of total number of calls that will
+          // remain after the filters
+          var total_num_calls = 0;
+
+          // Retrieve all the input data from the search parameters
+          var selected_users = $('#user_selection').select2('data');
+          var selected_numbers = $('#number_selection').select2('data');
+          var selected_direction = document.getElementById("direction").value;
+          var selected_asset = document.getElementById("assetlink").value;
+          var selected_missedcall = $('#missed_call').select2('data');
+          var selected_duration_op = document.getElementById("duration_op").value;
+          var selected_duration_num = document.getElementById("duration_num").value;
+          var selected_tags = $('#tags').select2('data');
+
+          // Retrieve the HTML DOM element which will contain the results of the search
+          var results_div = document.getElementById("callresults");
+
+          // Create a table element, which we will use to organize the results of the search
+          var table = document.createElement("table");
+          var att = document.createAttribute("id");
+          att.value = "callHistory";
+          table.setAttributeNode(att);
+          att = document.createAttribute("style");
+          att.value = "width: 100%; table-layout: auto";
+          table.setAttributeNode(att);
+
+          // For each set of responses retrieved from the Aircall API call (could be more than
+          // one because of pagination)...
+          for (var i = 0; i < response_data.length; i++) {
+            var call_data = JSON.parse(response_data[i]);
+
+            // For each call...
+            for (var j = 0; j < call_data.calls.length; j++) {
+              // Boolean to decide whether to include the call in the final list of
+              // search results
+              var display = false;
+
+              // Booleans to determine whether this call satisfied each search parameter -- these
+              // will ultimately be AND-ed together to determine the boolean value of "display"
+              var user_match = false;
+              var number_match = false;
+              var direction_match = false;
+              var asset_match = false;
+              var missed_match = false;
+              var duration_match = false;
+              var tags_match = false;
+
+              // If the "user" search input is empty, do not consider it in the search...
+              if (selected_users.length == 0) {
+                user_match = true;
+
+              // ..., else, we need to determine if any of the users included in the "user" search input
+              // are found within this call...
+              } else {
+                if (call_data.calls[j].user) {
+                  for (var k = 0; k < selected_users.length; k++) {
+                    if (selected_users[k].id.toString() == call_data.calls[j].user.id.toString()) {
+                      user_match = true;
+                    }
+                  }
+                }
+              }
+
+              if (!user_match) { continue; }
+
+              // If the "number" search input is empty, do not consider it in the search...
+              if (selected_numbers.length == 0) {
+                number_match = true;
+
+              // ..., else, we need to determine if any of the numbers included in the "number"
+              // search input are found within this call...
+              } else {
+                if (call_data.calls[j].number) {
+                  for (var k = 0; k < selected_numbers.length; k++) {
+                    if (selected_numbers[k].id.toString() == call_data.calls[j].number.id.toString()) {
+                      number_match = true;
+                    }
+                  }
+                }
+              }
+
+              if (!number_match) { continue; }
+
+              // If the "direction" search input is empty, do not consider it in the search...
+              if (selected_direction == "n_a") {
+                direction_match = true;
+
+              // ..., else, we need to determine if the direction set in the "direction" search input
+              // matches the direction of the call...
+              } else if (selected_direction == call_data.calls[j].direction) {
+                direction_match = true;
+              }
+
+              if (!direction_match) { continue; }
+
+              // If the "asset" search input is empty, do not consider it in the search...
+              if (selected_asset == "n_a") {
+                asset_match = true;
+
+              // ..., else, we need to determine if the asset set in the "asset" search input
+              // exists within the call object...
+              } else if (selected_asset == "either" &&
+              (call_data.calls[j].voicemail || call_data.calls[j].recording)) {
+                asset_match = true;
+              } else if (selected_asset == "recording" && call_data.calls[j].recording) {
+                asset_match = true;
+              } else if (selected_asset == "voicemail" && call_data.calls[j].voicemail) {
+                asset_match = true;
+              }
+
+              if (!asset_match) { continue; }
+
+              // If the "missed call" search input is empty, do not consider it in the search...
+              if (selected_missedcall.length == 0) {
+                missed_match = true;
+
+              // ..., else if the "missed call" search input is "N/A", do not
+              // consider it in the search...
+              } else if (selected_missedcall[0].id == "n_a") {
+                missed_match = true;
+
+              // ..., else, an option was explicitly chosen...
+              } else {
+                // If "not_missed" was chosen, simply check if the call has a
+                // 'null' missed call reason...
+                if (selected_missedcall[0].id == "not_missed" &&
+                (!call_data.calls[j].missed_call_reason)) {
+                  missed_match = true;
+
+                // ..., else if "missed" was chosen, simply check if the call has a
+                // non-empty missed call reason...
+                } else if (selected_missedcall[0].id == "missed" &&
+                call_data.calls[j].missed_call_reason) {
+                  missed_match = true;
+
+                // ..., else if at least one missed call reason was chosen, check if the
+                // call's missed call reason matches at least one of the options...
+                } else if (call_data.calls[j].missed_call_reason) {
+                  for (var k = 0; k < selected_missedcall.length; k++) {
+                    if (selected_missedcall[k].id == call_data.calls[j].missed_call_reason) {
+                      missed_match = true;
+                    }
+                  }
+                }
+              }
+
+              if (!missed_match) { continue; }
+
+              // If the "duration" search input (either the operatior or the number) is empty,
+              // do not consider it in the search...
+              if (selected_duration_op == "n_a" || (!selected_duration_num)) {
+                duration_match = true;
+
+              // ..., else if "greater" was chosen, check the call's duration to see if it
+              // is greater than the chosen duration number...
+              } else if (selected_duration_op == "greater" &&
+              (call_data.calls[j].duration > parseInt(selected_duration_num))) {
+                duration_match = true;
+
+              // ..., else if "less" was chosen, check the call's duration to see if it
+              // is less than the chosen duration number...
+              } else if (selected_duration_op == "less" &&
+              (call_data.calls[j].duration < parseInt(selected_duration_num))) {
+                duration_match = true;
+              }
+
+              if (!duration_match) { continue; }
+
+              // If the "tags" search input is empty, do not consider it in the search...
+              if (selected_tags.length == 0) {
+                tags_match = true;
+
+              // ..., else, at least one tag was chosen...
+              } else {
+                // If the call has at least one tag...
+                if (call_data.calls[j].tags) {
+                  // For each chosen tag from the "tags" search input...
+                  for (var k = 0; k < selected_tags.length; k++) {
+                    // Check if the chosen tag matches at least one of the tags from the call...
+                    for (var m = 0; m < call_data.calls[j].tags.length; m++) {
+                      if (selected_tags[k].id == call_data.calls[j].tags[m].name) {
+                        tags_match = true;
+                      }
+                    }
+                  }
+                }
+              }
+
+              if (!tags_match) { continue; }
+
+              // If all the search parameters are met, include the call in the final list
+              // of calls to display in the sidebar...
+              if (user_match && number_match && direction_match && asset_match &&
+              missed_match && duration_match && tags_match) {
+                display = true;
+              }
+
+              // If the call is to be included...
+              if (display) {
+                // Create a row for the Call ID header
+                var tr = document.createElement('tr');
+                att = document.createAttribute("bgcolor");
+                att.value = "#006b51";
+                tr.setAttributeNode(att);
+
+                var td = document.createElement('td');
+                att = document.createAttribute("style");
+                att.value = "font-family:arial; color:white; " +
+                  "font-size:12px; font-weight: bold; padding: 5px";
+                td.setAttributeNode(att);
+
+                var text = document.createTextNode("Call ID " + call_data.calls[j].id.toString());
+                td.appendChild(text);
+
+                // If the call has an assset link...
+                if (call_data.calls[j].asset) {
+                  // Create an asset link button for users to click
+                  td.innerHTML += '&nbsp;&nbsp;&nbsp;&nbsp;'
+                  var link = document.createElement('a');
+                  att = document.createAttribute("class");
+                  att.value = "buttonlink";
+                  link.setAttributeNode(att);
+                  att = document.createAttribute("href");
+                  att.value = call_data.calls[j].asset;
+                  link.setAttributeNode(att);
+                  att = document.createAttribute("target");
+                  att.value = "_blank";
+                  link.setAttributeNode(att);
+                  text = document.createTextNode("Asset");
+                  link.appendChild(text);
+
+                  td.appendChild(link);
+                }
+
+                tr.appendChild(td);
+                table.appendChild(tr);
+
+                // Create a row for this call's data to be displayed
+                tr = document.createElement('tr');
+                att = document.createAttribute("class");
+                att.value = "callData";
+                tr.setAttributeNode(att);
+
+                td = document.createElement('td');
+                att = document.createAttribute("style");
+                att.value = "padding: 8px 0px 8px 0px";
+                td.setAttributeNode(att);
+
+                var pre = document.createElement('pre');
+                pre.textContent = JSON.stringify(call_data.calls[j], undefined, 2);
+
+                att = document.createAttribute("style");
+                pre.setAttributeNode(att);
+
+                td.appendChild(pre);
+                tr.appendChild(td);
+                table.appendChild(tr);
+
+                // Create a row simply to divide this call from the next
+                // call to be displayed
+                tr = document.createElement('tr');
+                td = document.createElement('td');
+                att = document.createAttribute("style");
+                att.value = "padding: 0px 0px 3px 0px";
+                td.setAttributeNode(att);
+                td.textContent = " ";
+
+                tr.appendChild(td);
+                table.appendChild(tr);
+
+                // Increase the counter to keep track of total number of calls that
+                // will be displayed
+                total_num_calls++;
+              }
+            }
+          }
+
+          // Insert the entire table (which contains data from every call included
+          // in the search results) into the HTML document
+          results_div.appendChild(table);
+
+          // Display the total number of calls summary
+          document.getElementById("callcount").display = "";
+          document.getElementById("callcount").textContent = "Total: " +
+            total_num_calls + " rows";
+
+          // Signal to the script that we have finished displaying the results
+          results_finished = 1;
+        }
+      }
+
+
+      /*
+      * Collapses (minimizes) and maximizes the main search parameters box.
+      */
+      function collapseSearch() {
+        // Retrieve the DOM element that contains the main search parameters box
+        var content = document.getElementsByClassName("content")[0];
+
+        // If the box is currently open...
+        if (content.style.maxHeight) {
+          content.style.maxHeight = null;
+          document.getElementsByClassName("header")[0]
+            .getElementsByTagName("h5")[0].textContent = "Configure Search";
+
+        // ..., else, the box must be collapsed (minimized)...
+        } else {
+          content.style.maxHeight = content.scrollHeight + "px";
+          document.getElementsByClassName("header")[0]
+            .getElementsByTagName("h5")[0].textContent = "Search Parameters";
+        }
+      }
+
+
+      /*
+      * Collapses (minimizes) and maximizes the optional parameters box (within the
+      * main search box).
+      */
+      function collapseSearchOptions() {
+        // Retrieve the DOM element that contains the optional parameters box
+        var content = document.getElementsByClassName("content_options")[0];
+
+        // Retrieve the DOM element that contains the main search box
+        var con = document.getElementsByClassName("content")[0];
+
+        // If the optional parameters box is currently open...
+        if (content.style.maxHeight) {
+          // Adjust the height of the main search parameters box
+          var conMaxHeightStr = con.style.maxHeight;
+          var conMaxHeight = conMaxHeightStr.substring(0, conMaxHeightStr.indexOf("px"));
+          con.style.maxHeight = (parseInt(conMaxHeight) - parseInt(content.style.maxHeight)) + "px";
+
+          // Minimize the optional parameters box
+          content.style.maxHeight = null;
+        // ..., else, the box is collapsed (minimized)...
+        } else {
+          // Maximize the optional parameters box
+          content.style.maxHeight = content.scrollHeight + "px";
+
+          // Adjust the height of the main search parameters box as well
+          var conMaxHeightStr = con.style.maxHeight;
+          var conMaxHeight = conMaxHeightStr.substring(0, conMaxHeightStr.indexOf("px"));
+          con.style.maxHeight = (parseInt(content.scrollHeight) + parseInt(conMaxHeight)) + "px";
+        }
+      }
+
+
+      /*
+      * Function that checks if a number was inputted into the "duration" number seach
+      * parameter.
+      */
+      function checkNum() {
+        var numTextBox = document.getElementById("duration_num");
+        var numText = numTextBox.value.toUpperCase();
+
+        // If the inputted character is not a number, clear the text box...
+        if (!(/^\d*$/.test(numText))) {
+          numTextBox.value = "";
+        }
+      }
+
+
+      /*
+      * Function that hides information from the call history depending on the text being
+      * searched (the dynamic search box).
+      */
+      function filterSearch() {
+        var td, text;
+
+        // If text is currently highlighted, remove the highlighted text
+        var highlight = document.getElementById("highlight").value;
+        if (highlight == "Highlight (Off)") {
+          highlightText();
+        }
+
+        // Get the text we want to search
+        var searchTextBox = document.getElementById("searchBox");
+        var searchText = searchTextBox.value.toUpperCase();
+
+        // Get the rows where we want to dynamically hide depending on the text being searched
+        var callHistory = document.getElementById("callHistory");
+        var tr = callHistory.getElementsByClassName("callData");
+
+        var counter = 0;
+
+        // For each row...
+        for (var i = 0; i < tr.length; i++) {
+          td = tr[i].getElementsByTagName("td")[0];
+          if (td) {
+            text = td.textContent || td.innerText;
+            // If we find the text we want to search...
+            if (text.toUpperCase().indexOf(searchText) > -1) {
+              tr[i].style.display = "";
+              counter++;
+
+            // ..., else if we did not find the text...
+            } else {
+              var pre = td.getElementsByTagName("pre")[0];
+              // If this row has highlighted text...
+              if (pre) {
+                // Remove the highlight by removing the <span> element surrounding the text
+                var str = pre.innerHTML.replace(/<span class="toggle" style="display: inline;">/gi, "");
+                str.replace(/<\/span>/gi, "");
+                pre.innerHTML = str;
+              }
+
+              tr[i].style.display = "none";
+            }
+          }
+        }
+
+        // Retrieve the current number of calls being shown
+        var total_str = document.getElementById("callcount").textContent;
+
+        // Variable to keep track of total number of calls (even before
+        // the results are filtered by the dynamic search box)
+        var total_num_calls;
+
+        // If the current number of calls being shown is already dynamically filtered...
+        if (total_str.includes("Showing")) {
+          //  Retrieve the total number of calls from the current string
+          total_num_calls = total_str.substring((total_str.indexOf("/ ")+2),
+            total_str.indexOf(" rows"));
+
+        // ..., else the current number of calls has not yet been dynamically filtered...
+        } else {
+          // Retrieve the total number of calls from the current string
+          total_num_calls = total_str.substring((total_str.indexOf(": ")+2),
+            total_str.indexOf(" rows"));
+        }
+
+        // If the dynamic search box is empty...
+        if (!searchText.length) {
+          // Show the standard string displaying the total number of calls (no dynamically filtered)
+          // results
+          document.getElementById("callcount").textContent = "Total: " +
+            total_num_calls + " rows";
+
+        // ..., else the user has typed in a keyword to search using the dynamic search box...
+        } else {
+          // Display how many calls are being shown as a result of the dynamic search filter vs. the
+          // total number of calls (if there was no dynamic search filter)
+          document.getElementById("callcount").textContent = "Showing: " +
+            counter + " / " + total_num_calls + " rows";
+        }
+      }
+
+
+      /*
+      * Function that highlights text within the call search results.
+      */
+      function highlightText() {
+      var td, text;
+
+      // Determine whether something is currently highlighted or not
+      var highlight = document.getElementById("highlight").value;
+
+      // Get the text we want to search
+      var searchTextBox = document.getElementById("searchBox");
+      var searchText = searchTextBox.value.toUpperCase();
+
+      // Do not do anything if search text is empty
+      if (searchText.length == 0 && highlight != "Highlight (Off)") {
+        return;
+      }
+
+      // Get the call result rows where we want to search for the text
+      var callHistory = document.getElementById("callHistory");
+      var tr = callHistory.getElementsByClassName("callData");
+
+      // For every call result row...
+      for (var i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[0];
+        if (td) {
+          text = td.textContent || td.innerText;
+
+          // If we find the text we want to highlight...
+          if (text.toUpperCase().indexOf(searchText) > -1) {
+            var pre = td.getElementsByTagName("pre")[0];
+
+            // If nothing is highlighted yet...
+            if (highlight == "Highlight") {
+              // Highlight the text by wrapping it with a <span> element
+              pre.innerHTML = pre.innerHTML.replace(new RegExp(searchText, "gi"), function (match) {
+                return '<span class="toggle" style="display: inline;">' + match + "</span>";
+              });
+
+            // ...else, something is already highlighted...
+            } else {
+              // Remove the highlight by removing the <span> element surrounding the text
+              var str = pre.innerHTML.replace(/<span class="toggle" style="display: inline;">/gi, "");
+              str.replace(/<\/span>/gi, "");
+              pre.innerHTML = str;
+            }
+          }
+        }
+      }
+
+      // If nothing is highlighted yet...
+      if (highlight == "Highlight") {
+        // Run a toggle animation on all the text that we would like to highlight
+        $( ".toggle" ).fadeToggle();
+        $( ".toggle" ).fadeToggle();
+
+        // Change the style of the highlight button
+        document.getElementById("highlight").value = "Highlight (Off)";
+        document.getElementById("highlight").style.backgroundColor = "#006b51";
+
+      // ... else, something is already highlighted...
+      } else {
+        // Change the style of the highlight button
+        document.getElementById("highlight").value = "Highlight";
+        document.getElementById("highlight").style.backgroundColor = "";
+      }
+    }
+
+    /*
+    * Function that turns on/off the ability for user to highlight text within the call
+    * results table and auto-copy it to the search box for streamlined searching.
+    */
+    function autoSearch() {
+      var autosearch = document.getElementById("autosearch").value;
+
+      // If auto-search is currently enabled...
+      if (autosearch == "Auto-Search (Off)") {
+        // Disable it and change the style of the auto-search button
+        document.getElementById('callHistory').removeEventListener('mouseup', copyToSearch, false);
+        document.getElementById("autosearch").value = "Auto-Search";
+        document.getElementById("autosearch").style.backgroundColor = "";
+
+      // ... else, auto-search is currently disabled...
+      } else {
+        // Enable it and change the style of the auto-search button
+        document.getElementById('callHistory').addEventListener('mouseup', copyToSearch, false);
+        document.getElementById("autosearch").value = "Auto-Search (Off)";
+        document.getElementById("autosearch").style.backgroundColor = "#006b51";
+      }
+    }
+
+
+    /*
+    * Function that copies highlighted text to the search box automatically.
+    */
+    function copyToSearch(e) {
+      var text = (document.all) ? document.selection.createRange().text : document.getSelection();
+
+      if (text.toString().length != 0) {
+        document.getElementById("searchBox").value = text.toString();
+        filterSearch();
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <div class="card card-signin my-5" style="width: 85%; margin: auto;">
+      <div class="card-body">
+        <div class="header">
+          <h5 class="card-title text-center"
+          style="font-size: 16px; font-weight: bold; margin: auto; padding: 5px"
+          onclick="collapseSearch()">Configure Search</h5>
+        </div>
+        <div class="content">
+        <form id="form_container">
+          <br>
+          <div style="font-size: 14px; padding: 0px 0px 5px 0px">Activity Period</div>
+          <input id="flatpickr"
+          style="outline: none; border-radius: 5px; border: 1px solid #a6a6a6; width: 100%; height: 36px">
+          <br><br>
+          <div class="header_options"
+          style="font-size: 14px; padding: 0px 0px 5px 0px; font-weight: bold"
+          onclick="collapseSearchOptions()">Optionals</div>
+          <br>
+          <div class="content_options">
+            <div class="form-label-group">
+              <div style="font-size: 14px; padding: 0px 0px 5px 0px">Users</div>
+              <select id="user_selection" class="js-example-basic-multiple"
+              name="users[]" multiple="multiple" style="width: 100%">
+                <?
+                  // Gather all the user information that maps User ID to Username
+                  userdb_sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("UserDB");
+                  var userdb_data = userdb_sheet.getDataRange().getValues();
+                  for (var i = 0; i < userdb_data.length; i++) {
+                ?>
+                <option value=<?= userdb_data[i][0].toString() ?>><?= userdb_data[i][1] ?></option>
+                <?
+                  }
+                ?>
+              </select>
+            </div>
+            <br>
+            <div class="form-label-group">
+              <div style="font-size: 14px; padding: 0px 0px 5px 0px">Numbers</div>
+              <select id="number_selection" class="js-example-basic-multiple"
+              name="numbers[]" multiple="multiple" style="width: 100%">
+                <?
+                  // Gather all the number information that maps Number ID to Number Name
+                  numberdb_sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("NumberDB");
+                  var numberdb_data = numberdb_sheet.getDataRange().getValues();
+                  for (var i = 0; i < numberdb_data.length; i++) {
+                ?>
+                <option value=<?= numberdb_data[i][0].toString() ?>><?= numberdb_data[i][1] ?></option>
+                <?
+                  }
+                ?>
+              </select>
+            </div>
+            <br>
+            <div style="font-size: 14px; padding: 0px 0px 5px 0px">Call Direction</div>
+            <select id="direction" class="inputbox">
+              <option value="n_a">&nbsp;</option>
+              <option value="inbound">Inbound</option>
+              <option value="outbound">Outbound</option>
+            </select>
+            <br><br>
+            <div style="font-size: 14px; padding: 0px 0px 5px 0px">Asset</div>
+            <select id="assetlink" class="inputbox">
+              <option value="n_a">&nbsp;</option>
+              <option value="either">Recording or Voicemail</option>
+              <option value="recording">Recording</option>
+              <option value="voicemail">Voicemail</option>
+            </select>
+            <div class="form-label-group">
+              <br><div style="font-size: 14px; padding: 0px 0px 5px 0px">Missed Call</div>
+              <select id="missed_call" class="js-example-basic-multiple" name="missed_call"
+              multiple="multiple" style="width: 100%">
+                <option groupid="a" value="n_a">N/A</option>
+                <option groupid="b" value="not_missed">Not a missed call</option>
+                <option groupid="c" value="missed">Any type of missed call</option>
+                <option groupid="d" value="short_abandoned">Short abandoned</option>
+                <option groupid="d" value="abandoned_in_classic">Classic abandoned</option>
+                <option groupid="d" value="abandoned_in_ivr">IVR abandoned</option>
+                <option groupid="d" value="out_of_business_hours">Out of business hours</option>
+                <option groupid="d" value="agents_did_not_answer">Agents did not answer</option>
+                <option groupid="d" value="no_available_agent">No available agent</option>
+              </select>
+            </div>
+            <br>
+            <div style="font-size: 14px; padding: 0px 0px 5px 0px">Call Duration</div>
+            <select id="duration_op" class="inputbox" style="width: 30%">
+              <option value="n_a">&nbsp;</option>
+              <option value="greater">&gt;</option>
+              <option value="less">&lt;</option>
+            </select>
+            <input type="text" class="inputbox" id="duration_num" onkeyup="checkNum()"
+            placeholder="(in seconds)" style="width: 65%">
+            <div class="form-label-group">
+              <br><div style="font-size: 14px; padding: 0px 0px 5px 0px">Tags</div>
+              <select id="tags" class="js-example-basic-multiple" name="tags" multiple="multiple"
+              style="width: 100%">
+              </select>
+            </div>
+          </div>
+          <br>
+          <input type="button" class="button" value="SUBMIT" onclick="searchAdvanced()" />
+        </form>
+        </div>
+      </div>
+    </div>
+    <div id="resultstatus" style="text-align: center; font-size: 14px; width: 80%; margin: auto"></div>
+    <div style="padding: 0px 0px 0px 8px">
+      <input type="text" id="searchBox" onkeyup="filterSearch()"
+      placeholder="Search for keywords..." style="display: none">
+      <br><br>
+      <input type="button" class="highlightbutton" id="highlight" value="Highlight"
+      onclick="highlightText()" style="display: none" />
+      <input type="button" class="autosearchbutton" id="autosearch" value="Auto-Search"
+      onclick="autoSearch()" style="display: none" />
+    </div>
+    <br>
+    <div id="callcount" style="font-style: italic; font-size: 12px; padding: 0px 0px 5px 8px"></div>
+    <div id="callresults" style="padding: 8px"></div>
+    <script type="text/javascript">
+      // Initializes all of the special drop down plugins in the sidebar (provided by select2)
+      $(document).ready(function() {
+        $('.js-example-basic-multiple').select2();
+        $('.js-example-basic-single').select2();
+        $('#missed_call').select2({
+          allowClear: true
+        });
+        $('#tags').select2({
+          allowClear: true,
+          tags: true
+        });
+      });
+
+      // select2 event handler for selecting a missed call reason
+      $('#missed_call').on("select2:selecting", function(evt, f, g) {
+        filterMissedCallOptions(evt, this, true);
+      });
+
+      // select2 event handler for unselecting a missed call reason
+      $('#missed_call').on("select2:unselecting", function(evt) {
+        filterMissedCallOptions(evt, this, false);
+      });
+
+      /*
+      * Function that determines which options to disable when a selection
+      * is made within the "missed call reason" search parameter.
+      *   @param  {Event} evt           Event object that contains information about the
+      *                                 option selected
+      *           {Object} target       The DOM element we will retrieve all the options from
+      *           {Boolean} disabled    True if we need to disable option(s), false if we need
+      *                                 to re-enable option(s)
+      */
+      function filterMissedCallOptions(evt, target, disabled) {
+        // Get the ID of the "missed call reason" option selected
+        var selection_id = evt.params.args.data.id;
+        // Get the group ID of the "missed call reason" option selected
+        // Essentially, we will disable any other "missed call reason" option that is not
+        // part of this group
+        var selection_group = $("option[value='" + selection_id + "']").attr("groupid");
+        // Gather all options from the "missed call reason" search parameter
+        var all_options = $("option", target);
+
+        // For every option...
+        for (var i = 0; i < all_options.length; i++) {
+          // Get the value of the "missed call reason" option
+          var option_val = all_options[i].value;
+          // Determine the option's group ID
+          var option_group = $("option[value='" + option_val + "']").attr("groupid");
+
+          // If the option's group ID does not match the selected option's group ID,
+          // and the option is not the selected option itself...
+          if (option_group != selection_group && option_val != selection_id) {
+            // If we need to disable option(s)...
+            if (disabled) {
+              // Disable this specific option from being able to be selected as a
+              // missed call reason
+              $("option[value='" + option_val + "']").attr('disabled','disabled');
+
+            // ..., else we need to re-enable option(s)...
+            } else {
+              // If the current option is enabled, or there are going to be no more
+              // selected options if we re-enable this option...
+              if (!$("option[value='" + option_val + "']").attr('disabled') ||
+              (($("#missed_call").select2('data').length - 1) == 0)) {
+                // This special condition is put in place to make sure that if there
+                // is at least one option (that belongs to a multi-member group) selected,
+                // we should not re-enable the options from other groups until ALL
+                // options from this group have been de-selected
+
+                // Enable this specific option to be able to be selected as a
+                // missed call reason
+                $("option[value='" + option_val + "']").removeAttr('disabled');
+              }
+            }
+          }
+        }
+      }
+
+      // Initializes the calendar picker plugin in the sidebar (provided by flatpickr)
+      selected_dates = flatpickr('#flatpickr', {
+        enableTime: true,
+        enableSeconds: true,
+        defaultHour: 0,
+        mode: "range"
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/js/select2.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+    <style>
+      .required {color: #FF0000;}
+      .select2-dropdown {
+      	background-color: #00b388;
+      	border: 1px solid #aaa;
+	      border-radius: 4px;
+	      box-sizing: border-box;
+	      display: block;
+	      position: absolute;
+	      left: -100000px;
+	      width: 100%;
+	      z-index: 1051;
+        color: white;
+        font-size: 14px
+      }
+      .select2-container--default .select2-selection--single {
+        background-color: #fff;
+        border: 1px solid #aaa;
+        border-radius: 4px;
+        font-size: 14px;
+        outline: 0;
+      }
+      .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #00b388;
+        border: 1px solid #006b51;
+        border-radius: 4px;
+        cursor: default;
+        float: left;
+        margin-right: 5px;
+        margin-top: 5px;
+        padding: 0 5px;
+        font-size: 14px;
+        color: white;
+      }
+      .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        color: white;
+        cursor: pointer;
+        display: inline-block;
+        font-weight: bold;
+        margin-right: 2px
+      }
+      .select2-container--default.select2-container--focus .select2-selection--multiple {
+        border: solid #00b388 1px;
+        outline: 0
+      }
+      .select2-container--default .select2-results__option[aria-selected=true] {
+	      background-color: #006b51
+      }
+      .select2-container--default .select2-results__option--highlighted[aria-selected] {
+	      background-color: #d8f3ec;
+	      color: #00b388;
+        font-weight: bold;
+      }
+      body {background-color: #d8f3ec;}
+      .button {
+        background-color: #006b51;
+        border: none;
+        color: white;
+        padding: 7px 7px 7px 7px;
+        text-align: center;
+        font-size: 14px;
+        font-weight: bold;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .button:hover, .button:active {
+        background-color: #00b388;
+      }
+      #interval {padding: 5px; border: 1px solid #006b51; border-radius: 5px; width: 100%; font-size: 14px;}
+      #api_key {padding: 5px; border: 1px solid #006b51; border-radius: 5px; width: 100%; font-size: 14px;}
+      #user_interval {padding: 5px; border: 1px solid #006b51; border-radius: 5px; width: 100%; font-size: 14px;}
+      #team_interval {padding: 5px; border: 1px solid #006b51; border-radius: 5px; width: 100%; font-size: 14px;}
+      #wait_lvl_1 {padding: 5px; border: 1px solid #006b51; border-radius: 5px; width: 100%; font-size: 14px;}
+      #wait_lvl_2 {padding: 5px; border: 1px solid #006b51; border-radius: 5px; width: 100%; font-size: 14px;}
+      #sla {padding: 5px; border: 1px solid #006b51; border-radius: 5px; width: 100%; font-size: 14px;}
+    </style>
+    <script>
+      /*
+      * Function that collects the values of the configuration params inputted.
+      */
+      function collectParams() {
+        var interval = document.getElementById("interval").value;
+        var api_key = document.getElementById("api_key").value;
+        var team_interval = document.getElementById("team_interval").value;
+        var user_interval = document.getElementById("user_interval").value;
+        var wait_lvl_1 = document.getElementById("wait_lvl_1").value;
+        var wait_lvl_2 = document.getElementById("wait_lvl_2").value;
+        var sla = document.getElementById("sla").value;
+
+        var filtered_teams = "";
+
+        if ($('#team_selection').select2('data')) {
+          var selected_teams = $('#team_selection').select2('data');
+
+          for (var i = 0; i < selected_teams.length; i++) {
+            filtered_teams += (selected_teams[i].id.toString()) + ";";
+          }
+
+          if (selected_teams.length > 0) {
+            filtered_teams = filtered_teams.substring(0, (filtered_teams.length - 1));
+          }
+        }
+
+        google.script.run.setConfigParams(interval, api_key, user_interval,
+          team_interval, wait_lvl_1, wait_lvl_2, sla, filtered_teams);
+        google.script.host.close();
+      }
+
+      /*
+      * Function that checks if a number was inputted into the "duration" number seach
+      * parameter.
+      */
+      function checkNum(input) {
+        var numTextBox = document.getElementById(input);
+        var numText = numTextBox.value.toUpperCase();
+
+        // If the inputted character is not a number, clear the text box...
+        if (!(/^\d*$/.test(numText))) {
+          numTextBox.value = "";
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <br><br>
+    <table id="input_params" style="width: 100%">
+      <tr bgcolor="#00b388">
+        <td style="font-family:arial; color:white; font-size:11px; padding:5px">
+          <b>Activity Period (in mins)</b>
+        </td>
+      </tr>
+      <tr>
+        <td style="font-size:11px; color:#006b51;">
+          <input type="text" id="interval" placeholder="15" onkeyup="checkNum('interval')">
+          <br>
+        </td>
+      </tr>
+      <tr bgcolor="#00b388">
+        <td style="font-family:arial; color:white; font-size:11px; padding:5px"><b>API Key</b></td>
+      </tr>
+      <tr>
+        <td style="font-size:11px; color:#006b51;">
+          <input type="text" id="api_key">
+          <br>
+        </td>
+      </tr>
+      <tr bgcolor="#00b388">
+        <td style="font-family:arial; color:white; font-size:11px; padding:5px">
+          <b>User Refresh Interval (in mins)</b>
+        </td>
+      </tr>
+      <tr>
+        <td style="font-size:11px; color:#006b51;">
+          <input type="text" id="user_interval" placeholder="240" onkeyup="checkNum('user_interval')">
+          <br>
+        </td>
+      </tr>
+          <tr bgcolor="#00b388">
+        <td style="font-family:arial; color:white; font-size:11px; padding:5px">
+          <b>Team Refresh Interval (in mins)</b>
+        </td>
+      </tr>
+      <tr>
+        <td style="font-size:11px; color:#006b51;">
+          <input type="text" id="team_interval" placeholder="480" onkeyup="checkNum('team_interval')">
+          <br>
+        </td>
+      </tr>
+      </tr>
+      <tr bgcolor="#00b388">
+        <td style="font-family:arial; color:white; font-size:11px; padding:5px">
+          <b>Call Waiting Threshold 1 (in seconds)</b>
+        </td>
+      </tr>
+      <tr>
+        <td style="font-size:11px; color:#006b51;">
+          <input type="text" id="wait_lvl_1" placeholder="10" onkeyup="checkNum('wait_lvl_1')">
+          <br>
+        </td>
+      </tr>
+      </tr>
+          <tr bgcolor="#00b388">
+        <td style="font-family:arial; color:white; font-size:11px; padding:5px">
+          <b>Call Waiting Threshold 2 (in seconds)</b>
+        </td>
+      </tr>
+      <tr>
+        <td style="font-size:11px; color:#006b51;">
+          <input type="text" id="wait_lvl_2" placeholder="20" onkeyup="checkNum('wait_lvl_2')">
+          <br>
+        </td>
+      </tr>
+      </tr>
+          <tr bgcolor="#00b388">
+        <td style="font-family:arial; color:white; font-size:11px; padding:5px">
+          <b>SLA (in seconds)</b>
+        </td>
+      </tr>
+      <tr>
+        <td style="font-size:11px; color:#006b51;">
+          <input type="text" id="sla" placeholder="0 for disable" onkeyup="checkNum('sla')">
+          <br>
+        </td>
+      </tr>
+      <?
+        // Get the API key
+        var cache = PropertiesService.getScriptProperties();
+        const api_key = cache.getProperty("api_key");
+
+        if (api_key) {
+      ?>
+      <tr bgcolor="#00b388">
+        <td style="font-family:arial; color:white; font-size:11px; padding:5px">
+          <b>Aircall Teams</b>
+        </td>
+      </tr>
+      </tr>
+      <tr>
+        <td>
+          <div class="form-label-group">
+            <select id="team_selection" class="js-example-basic-multiple"
+            name="teams[]" multiple="multiple" style="width: 100%">
+              <?
+                // Need to define special ID for users with no Aircall team
+                const NO_TEAM = "999999999"
+
+                // Set headers and parameters for any future Aircall API calls
+                var headers = {
+                  "Authorization" : "Basic " + api_key
+                };
+                var get_params = {
+                  "method":"GET",
+                  "headers":headers
+                };
+
+                var fetch_nextpage = true;
+
+                // Define the url for the Aircall Team API call
+                var teams_url = "https://api.aircall.io/v1/teams?per_page=50";
+
+                // While there is still at least one page to review for Aircall team information
+                // (pagination)...
+                while (fetch_nextpage) {
+
+                  // Make the Aircall Team API call and parse the response
+                  var teams_response = UrlFetchApp.fetch(teams_url, get_params);
+                  var teams_json = teams_response.getContentText();
+                  var teams_data = JSON.parse(teams_json);
+
+                  // For every Aircall Team...
+                  for (var i = 0; i < teams_data.teams.length; i++) {
+              ?>
+              <option value=<?= teams_data.teams[i].id.toString() ?>><?= teams_data.teams[i].name ?></option>
+              <?
+                  }
+
+                  // Determine if we need to iterate through other pages of results from the API call...
+                  if (teams_data.meta.next_page_link) {
+                    teams_url = teams_data.meta.next_page_link;
+                  } else {
+                    fetch_nextpage = false;
+                  }
+                }
+              ?>
+              <option value=<?= NO_TEAM ?>>Single Users</option>
+            </select>
+          </div>
+        </td>
+      </tr>
+      <?
+        }
+      ?>
+    </table>
+    <br>
+    <input type="button" class="button" value="Submit" onclick="collectParams()" />
+
+    <script type="text/javascript">
+      // Initializes all of the special drop down plugins in the sidebar (provided by select2)
+      $(document).ready(function() {
+        $('.js-example-basic-multiple').select2({
+          placeholder: "Leave empty for no team filter..."
+        });
+        $('.js-example-basic-single').select2();
+      });
+    </script>
+  </body>
+</html>
