@@ -114,6 +114,7 @@
       }
     }
 
+
     /*
     * Function that turns on/off the ability for user to highlight text within the call
     * results table and auto-copy it to the search box for streamlined searching.
@@ -212,7 +213,7 @@
             for (var j = 0; j < mp3_tr.length; j++) {
               var mp3_td = mp3_tr[j].getElementsByTagName("td")[0];
               if (mp3_td) {
-                mp3_tr[j].style.display = "";
+                //mp3_tr[j].style.display = "";
               }
             }
             
@@ -228,6 +229,7 @@
             }
 
             tr[i].style.display = "none";
+
           }
         }
       }
@@ -281,104 +283,6 @@
       var cache = PropertiesService.getScriptProperties();
       const api_key = cache.getProperty("api_key");
 
-      // Need to define special ID for users with no Aircall team
-      const NO_TEAM = "999999999"
-
-      // Create a JSON object which will keep track of which Aircall users belong
-      // to which Aircall teams
-      // Structure: {
-      //  "User ID 1": {
-      //    "Team ID A": "Team Name A",
-      //    "Team ID B": "Team Name B",
-      //    ...
-      //  },
-      //  "User ID 2": {
-      //    "Team ID C": "Team Name C",
-      //    "Team ID D": "Team Name D",
-      //    ...
-      //  }
-      //  ...
-      // }
-      var teamsdb = JSON.parse(cache.getProperty("teams_cache_db"));
-      var filtered_teams = JSON.parse(cache.getProperty("filteredteams_cache_db"));
-
-      // If there exists a team filter...
-      if (filtered_teams) {
-
-        // Create a JSON object which will contain the mappings between User ID and Phone Numbers
-        // Structure: {
-        //  "User ID 1": {
-        //    "Phone Number ID A": "Phone Number Name A",
-        //    "Phone Number ID B": "Phone Number Name B",
-        //    ...
-        //   },
-        //  "User ID 2": {
-        //    "Phone Number ID G": "Phone Number Name G",
-        //    "Phone Number ID H": "Phone Number Name H",
-        //    ...
-        //   },
-        //  ...
-        // }
-        var user_numberdb = {};
-
-
-        // From the "UserDB" sheet, collect all the Aircall user info to keep track of mappings
-        // between User ID and Username
-        userdb_sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("UserDB");
-        var userdb_data = userdb_sheet.getDataRange().getValues();
-
-        // For every Aircall user...
-        for (var i = 0; i < userdb_data.length; i++) {
-          var userid = userdb_data[i][0];
-
-          // If user is part of an Aircall team...
-          if (teamsdb[userid]) {
-
-            // Get the list of all teams this Aircall user belongs to...
-            var user_teams = Object.keys(teamsdb[userid]);
-
-            // For each Aircall team...
-            user_teams.forEach(function (teamid) {
-              
-              // If this user is part of a team included in the team filter...
-              if (filtered_teams[teamid]) {
-
-                // If we know which phone numbers this user is assigned to...
-                if (userdb_data[i][2]) {
-                  // Convert the string into a list of phone numbers (delimited by the ";" character)
-                  var numbers = userdb_data[i][2].split(";");
-
-                  user_numberdb[userdb_data[i][0].toString()] = {};
-
-                  // For each phone number...
-                  for (var n = 0; n < numbers.length; n++) {
-                    // Keep track of it for this user
-                    user_numberdb[userdb_data[i][0].toString()][numbers[n].split(":")[0]] = numbers[n].split(":")[1];
-                  }
-                }
-              }
-            });
-
-          // ...else, user is not part of an Aircall team...
-          } else {
-
-            // If all single users have been included in the team filter...
-            if (filtered_teams[NO_TEAM]) {
-              // Convert the string into a list of phone numbers (delimited by the ";" character)
-              var numbers = userdb_data[i][2].split(";");
-
-              user_numberdb[userdb_data[i][0].toString()] = {};
-
-              // For each phone number...
-              for (var n = 0; n < numbers.length; n++) {
-                // Keep track of it for this user
-                user_numberdb[userdb_data[i][0].toString()][numbers[n].split(":")[0]] = numbers[n].split(":")[1];
-              }
-            }
-          }
-        }
-      }
-
       // Variable to keep track of time limit a recording/voicemail is generally available for
       const AVAIL_TIME_LIMIT = 9;
 
@@ -391,6 +295,47 @@
         "headers":headers
       };
 
+      // Get the User Id
+      var userid = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("UserSelection").getRange("B1").getValue();
+
+      // Create a JSON object which will contain the mappings between User ID and Phone Numbers
+      // Structure: {
+      //  "User ID 1": {
+      //    "Phone Number ID A": "Phone Number Name A",
+      //    "Phone Number ID B": "Phone Number Name B",
+      //    ...
+      //   },
+      //  "User ID 2": {
+      //    "Phone Number ID G": "Phone Number Name G",
+      //    "Phone Number ID H": "Phone Number Name H",
+      //    ...
+      //   },
+      //  ...
+      // }
+      var user_numberdb = {};
+
+
+      // From the "UserDB" sheet, collect all the Aircall user info to keep track of mappings
+      // between User ID and Username
+      userdb_sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("UserDB");
+      var userdb_data = userdb_sheet.getDataRange().getValues();
+
+      for (var i = 0; i < userdb_data.length; i++) {
+        // If we know which numbers this user is assigned to...
+        if ((userid == userdb_data[i][0]) && userdb_data[i][2]) {
+          // Convert the string into a list of phone numbers (delimited by the ";" character)
+          var numbers = userdb_data[i][2].split(";");
+
+          user_numberdb[userdb_data[i][0].toString()] = {};
+
+          // For each phone number...
+          for (var n = 0; n < numbers.length; n++) {
+            // Keep track of it
+            user_numberdb[userdb_data[i][0].toString()][numbers[n].split(":")[0]] = numbers[n].split(":")[1];
+          }
+        }
+      }
+
       // Convert current time and [current time - live feed interval period] to
       // UNIX epoch format
       var currtime = parseInt((new Date().getTime())/1000);
@@ -398,7 +343,7 @@
       var fetch_nextpage = true;
 
       // Define the url for the Aircall Calls API call
-      var calls_url = "https://api.aircall.io/v1/calls?order=desc&per_page=50&from=" + mins_before_currtime.toString() +
+      var calls_url = "https://api.aircall.io/v1/calls/search?order=desc&per_page=50&from=" + mins_before_currtime.toString() +
         "&to=" + currtime.toString();
 
       var avail_pagenum = 1;
@@ -414,79 +359,24 @@
         // For each call... (display in in the HTML page)
         for (var i = 0; i < calls_data.calls.length; i++) {
 
-          // We will need to keep track of whether the user involved with this call
-          // is relevant (either because there is no team filter so all users are relevant,
-          // or because there is a team filter and this user is part of a team included
-          // in the filter)
-          var relevant_user = false;
+          var found = false;
 
-          // We will also need to keep track of whether a missed call (which has no associated
-          // user) is relevant (because the call was missed on a phone number on which a user
-          // is assigned to, and this user is part of a team that is included in the team filter
-          // if one is set)
-          var missed_found = false;
+          if (calls_data.calls[i].missed_call_reason) {
+            // Get the list of all Aircall users
+            var users_with_numbers = Object.keys(user_numberdb);
 
-          // If there is a team filter...
-          if (filtered_teams) {
-
-            // If there is a user involved with the call...
-            if (calls_data.calls[i].user) {
-
-              // If this user is part of any Aircall team...
-              if (teamsdb[calls_data.calls[i].user.id]) {
-
-                // Get the list of all Aircall teams assigned to this user
-                var user_teams = Object.keys(teamsdb[calls_data.calls[i].user.id]);
-
-                // For each team...
-                for (var k = 0; k < user_teams.length; k++) {
-
-                  // If this user is part of a team included in the team filter...
-                  if (filtered_teams[user_teams[k]]) {
-                    // Keep track that this user is relevant
-                    relevant_user = true;
-                    break;
-                  }
-                }
-
-              // ...else, this user is not part of an Aircall team...
-              } else {
-                // If either there is no team filter, or if there is a team filter
-                // and all single users have been included in the filter...
-                if (!filtered_teams || (filtered_teams && filtered_teams[NO_TEAM])) {
-                  // Keep track that this user is relevant
-                  relevant_user = true;
-                }
+            // For each Aircall user...
+            users_with_numbers.forEach(function (user) {
+              // If this user is assigned to this phone number that missed the call...
+              if (user_numberdb[user][calls_data.calls[i].number.id]) {
+                found = true;
               }
-            }
-
-            // If there is no user involved with the call and the call is missed...
-            if (calls_data.calls[i].missed_call_reason) {
-              // Get the list of all Aircall users and their assigned phone numbers
-              var users_with_numbers = Object.keys(user_numberdb);
-
-              // For each Aircall user...
-              for (var k = 0; k < users_with_numbers.length; k++) {
-
-                // If this user is assigned to this phone number that missed the call...
-                if (user_numberdb[users_with_numbers[k]][calls_data.calls[i].number.id]) {
-                  // Keep track of this call as relevant
-                  missed_found = true;
-                  break;
-                }
-              }
-            }
-
-          // ...else, there is no team filter
-          } else {
-
-            // In this case, we assume every user/call is relevant
-            relevant_user = true;
+            });
           }
 
-          // If either the user is relevant, or the call which was missed is relevant...
-          if (missed_found || relevant_user) {
-
+          // If call is directly related to this user or the call is missed and related
+          // to an Aircall number of which the user is assigned to...
+          if (found || (calls_data.calls[i].user && (calls_data.calls[i].user.id == userid))) {
             // Get the recording and voicemail weblinks
             var recording = calls_data.calls[i].recording;
             var voicemail = calls_data.calls[i].voicemail;
@@ -579,8 +469,8 @@
         // Determine if we need to iterate through other pages of results from the API call...
         if (calls_data.meta.next_page_link) {
           avail_pagenum++;
-          calls_url = "https://api.aircall.io/v1/calls?order=desc&per_page=50&page=" + avail_pagenum.toString() +
-          "&from=" + mins_before_currtime.toString() + "&to=" + currtime.toString();
+          calls_url = "https://api.aircall.io/v1/calls/search?order=desc&per_page=50&page=" + avail_pagenum.toString() +
+          "&from=" + mins_before_currtime.toString() + "&to=" + currtime.toString() + "&user_id=" + userid;
           //calls_url = calls_data.meta.next_page_link;
         } else {
           fetch_nextpage = false;
