@@ -92,7 +92,7 @@
               str.replace(/<\/span>/gi, "");
               pre.innerHTML = str;
             }
-          }
+          } 
         }
       }
 
@@ -105,7 +105,7 @@
         // Change the style of the highlight button
         document.getElementById("highlight").value = "Highlight (Off)";
         document.getElementById("highlight").style.backgroundColor = "#006b51";
-
+      
       // ... else, something is already highlighted...
       } else {
         // Change the style of the highlight button
@@ -128,7 +128,7 @@
         document.getElementById('callHistory').removeEventListener('mouseup', copyToSearch, false);
         document.getElementById("autosearch").value = "Auto-Search";
         document.getElementById("autosearch").style.backgroundColor = "";
-
+      
       // ... else, auto-search is currently disabled...
       } else {
         // Enable it and change the style of the auto-search button
@@ -216,7 +216,7 @@
                 //mp3_tr[j].style.display = "";
               }
             }
-
+            
           // ..., else if we did not find the text...
           } else {
             var pre = td.getElementsByTagName("pre")[0];
@@ -244,13 +244,13 @@
       // If the current number of calls being shown is already dynamically filtered...
       if (total_str.includes("Showing")) {
         //  Retrieve the total number of calls from the current string
-        total_num_calls = total_str.substring((total_str.indexOf("/ ")+2),
+        total_num_calls = total_str.substring((total_str.indexOf("/ ")+2), 
           total_str.indexOf(" rows"));
-
+      
       // ..., else the current number of calls has not yet been dynamically filtered...
       } else {
         // Retrieve the total number of calls from the current string
-        total_num_calls = total_str.substring((total_str.indexOf(": ")+2),
+        total_num_calls = total_str.substring((total_str.indexOf(": ")+2), 
           total_str.indexOf(" rows"));
       }
 
@@ -258,14 +258,14 @@
       if (!searchText.length) {
         // Show the standard string displaying the total number of calls (no dynamically filtered)
         // results
-        document.getElementById("callcount").textContent = "Total: " +
+        document.getElementById("callcount").textContent = "Total: " + 
           total_num_calls + " rows";
 
       // ..., else the user has typed in a keyword to search using the dynamic search box...
       } else {
         // Display how many calls are being shown as a result of the dynamic search filter vs. the
         // total number of calls (if there was no dynamic search filter)
-        document.getElementById("callcount").textContent = "Showing: " +
+        document.getElementById("callcount").textContent = "Showing: " + 
           counter + " / " + total_num_calls + " rows";
       }
     }
@@ -275,7 +275,7 @@
   <input type="button" class="highlightbutton" id="highlight" value="Highlight" onclick="highlightText()" />
   <input type="button" class="autosearchbutton" id="autosearch" value="Auto-Search" onclick="autoSearch()" />
   <br><br><br>
-  <div id="callcount"
+  <div id="callcount" 
   style="font-family:arial; font-style: italic; font-size: 12px; padding: 0px 0px 10px 3px"></div>
   <table id="callHistory" style="width: 100%">
     <?
@@ -384,7 +384,7 @@
             // Get the current length of time between now and when the call ended
             var avail_time = Number.MAX_SAFE_INTEGER;
             if (calls_data.calls[i].ended_at) {
-              avail_time = ((parseInt((new Date().getTime())/1000) -
+              avail_time = ((parseInt((new Date().getTime())/1000) - 
                 calls_data.calls[i].ended_at)/60).toFixed(2);
             }
     ?>
@@ -401,7 +401,7 @@
       </td>
     </tr>
     <?
-            // If we are below the time limit a voicemail/recording is usually available for,
+            // If we are below the time limit a voicemail/recording is usually available for, 
             // there exists a weblink for either a voicemail or recording...
             if ((avail_time < AVAIL_TIME_LIMIT) && (recording || voicemail)) {
               if (recording) {
@@ -433,10 +433,33 @@
     <?
               }
             }
+
+            var calls_str = JSON.stringify(calls_data.calls[i], undefined, 2);
+
+            // If there is a "started_at" time, convert it to a human-readable string
+            if (calls_str.match(/"started_at": \d{10,},/gi)) {
+              var started_at = calls_str.match(/"started_at": \d{10,},/gi)[0].split(" ")[1].split(",")[0];
+              var started_at_time = new Date(started_at * 1000);
+              calls_str = calls_str.replace(/"started_at": \d{10,},/gi, '"started_at": ' + started_at_time + ',');
+            }
+
+            // If there is a "answered_at" time, convert it to a human-readable string
+            if (calls_str.match(/"answered_at": \d{10,},/gi)) {
+              var answered_at = calls_str.match(/"answered_at": \d{10,},/gi)[0].split(" ")[1].split(",")[0];
+              var answered_at_time = new Date(answered_at * 1000);
+              calls_str = calls_str.replace(/"answered_at": \d{10,},/gi, '"answered_at": ' + answered_at_time + ',');
+            }
+
+            // If there is a "ended_at" time, convert it to a human-readable string
+            if (calls_str.match(/"ended_at": \d{10,},/gi)) {
+              var ended_at = calls_str.match(/"ended_at": \d{10,},/gi)[0].split(" ")[1].split(",")[0];
+              var ended_at_time = new Date(ended_at * 1000);
+              calls_str = calls_str.replace(/"ended_at": \d{10,},/gi, '"ended_at": ' + ended_at_time + ',');
+            }
     ?>
     <tr class="callData">
       <td style="font-size:11px; color:#006b51;">
-        <pre><?= JSON.stringify(calls_data.calls[i], undefined, 2) ?></pre>
+        <pre><?= calls_str ?></pre>
       </td>
     </tr>
     <?
@@ -464,7 +487,7 @@
 
       // Display the total number of calls in result summary at the top of the page
       var totalcalls = tr.length;
-      document.getElementById("callcount").display = "";
+      document.getElementById("callcount").display = ""; 
       document.getElementById("callcount").textContent = "Total: " + totalcalls + " rows";
     });
   </script>
