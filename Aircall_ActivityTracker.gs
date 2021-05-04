@@ -47,19 +47,22 @@ function activityTracker() {
   // Retrieve all the metadata that has been cached (for performance reasons)
   var cache = PropertiesService.getScriptProperties();
 
-  // Refresh the cache with information that will be used in other parts of the feed
-  cache.setProperty("waitlevel1", WAIT_LEVEL_1.toString());
-  cache.setProperty("waitlevel2", WAIT_LEVEL_2.toString());
-
-
   // We will override the configuration parameters set in the script with those input from
   // the configuration params sidebar
   if (cache.getProperty("interval")) {INTERVAL = parseInt(cache.getProperty("interval")).toFixed(0);}
   if (cache.getProperty("api_key")) {API_KEY = cache.getProperty("api_key");}
   if (cache.getProperty("user_interval")) {USER_REFRESH_INTERVAL = cache.getProperty("user_interval");}
   if (cache.getProperty("team_interval")) {TEAM_REFRESH_INTERVAL = cache.getProperty("team_interval");}
-  if (cache.getProperty("wait_lvl_1")) {WAIT_LEVEL_1 = cache.getProperty("wait_lvl_1");}
-  if (cache.getProperty("wait_lvl_2")) {WAIT_LEVEL_2 = cache.getProperty("wait_lvl_2");}
+  if (cache.getProperty("wait_lvl_1")) {
+    WAIT_LEVEL_1 = cache.getProperty("wait_lvl_1");
+  } else {
+    cache.setProperty("wait_lvl_1", WAIT_LEVEL_1);
+  }
+  if (cache.getProperty("wait_lvl_2")) {
+    WAIT_LEVEL_2 = cache.getProperty("wait_lvl_2");
+  } else {
+    cache.setProperty("wait_lvl_2", WAIT_LEVEL_2);
+  }
   if (cache.getProperty("sla")) {SLA = parseInt(cache.getProperty("sla"));}
 
 
@@ -1073,8 +1076,8 @@ function formatWaitCell(row_num, col_num, sheet, rowsize, colsize, type, info_pa
 
   // ...else, this is a standard cell which will contain information about a queued call...
   } else {
-    var waitlevel1 = parseInt(cache.getProperty("waitlevel1"));
-    var waitlevel2 = parseInt(cache.getProperty("waitlevel2"));
+    var waitlevel1 = parseInt(cache.getProperty("wait_lvl_1"));
+    var waitlevel2 = parseInt(cache.getProperty("wait_lvl_2"));
 
     // Determine whether the waiting time of the queued call is within the accepted thresholds,
     // and format the cell according to the length of waiting time...
