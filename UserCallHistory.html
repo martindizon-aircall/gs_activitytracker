@@ -440,26 +440,28 @@
             if (calls_str.match(/"started_at": \d{10,},/gi)) {
               var started_at = calls_str.match(/"started_at": \d{10,},/gi)[0].split(" ")[1].split(",")[0];
               var started_at_time = new Date(started_at * 1000);
-              calls_str = calls_str.replace(/"started_at": \d{10,},/gi, '"started_at": ' + started_at_time + ',');
+              calls_str = calls_str.replace(/"started_at": \d{10,},/gi, '"started_at": "' + started_at_time + '",');
             }
 
             // If there is a "answered_at" time, convert it to a human-readable string
             if (calls_str.match(/"answered_at": \d{10,},/gi)) {
               var answered_at = calls_str.match(/"answered_at": \d{10,},/gi)[0].split(" ")[1].split(",")[0];
               var answered_at_time = new Date(answered_at * 1000);
-              calls_str = calls_str.replace(/"answered_at": \d{10,},/gi, '"answered_at": ' + answered_at_time + ',');
+              calls_str = calls_str.replace(/"answered_at": \d{10,},/gi, '"answered_at": "' + answered_at_time + '",');
             }
 
             // If there is a "ended_at" time, convert it to a human-readable string
             if (calls_str.match(/"ended_at": \d{10,},/gi)) {
               var ended_at = calls_str.match(/"ended_at": \d{10,},/gi)[0].split(" ")[1].split(",")[0];
               var ended_at_time = new Date(ended_at * 1000);
-              calls_str = calls_str.replace(/"ended_at": \d{10,},/gi, '"ended_at": ' + ended_at_time + ',');
+              calls_str = calls_str.replace(/"ended_at": \d{10,},/gi, '"ended_at": "' + ended_at_time + '",');
             }
+
+            var calls_str_json = JSON.parse(calls_str);
     ?>
     <tr class="callData">
       <td style="font-size:11px; color:#006b51;">
-        <pre><?= calls_str ?></pre>
+        <pre><?= JSON.stringify(calls_str_json, undefined, 2); ?></pre>
       </td>
     </tr>
     <?
