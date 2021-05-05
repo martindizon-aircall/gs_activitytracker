@@ -10,20 +10,20 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
     <style>
       body {background-color: #d8f3ec;}
-      pre { 
-        font-family: monospace; 
-        font-size: 11px; 
+      pre {
+        font-family: monospace;
+        font-size: 11px;
         color: #006b51;
-        font-style: normal; 
-        font-variant: normal; 
-        font-weight: 400; 
-        line-height: 14px; 
+        font-style: normal;
+        font-variant: normal;
+        font-weight: 400;
+        line-height: 14px;
       }
       #searchBox {
-        padding: 5px; 
-        border: 1px solid #006b51; 
-        width: 250px; 
-        height: 30px; 
+        padding: 5px;
+        border: 1px solid #006b51;
+        width: 250px;
+        height: 30px;
         font-size: 13px;
         font-family: arial;
       }
@@ -75,12 +75,12 @@
         transition: max-height 0.2s ease-out;
       }
       .inputbox {
-        width: 100%; 
-        height: 30px; 
-        font-size: 13px; 
-        padding: 5px; 
-        border-radius: 5px; 
-        border: 1px solid #aaaaaa; 
+        width: 100%;
+        height: 30px;
+        font-size: 13px;
+        padding: 5px;
+        border-radius: 5px;
+        border: 1px solid #aaaaaa;
         outline: 0
       }
       .header:hover{
@@ -295,7 +295,7 @@
           // Call function to constantly update the waiting time on page so that user understands
           // something is happening in the background (instead of believing the page froze)
           pollResults(0);
-        
+
         // ... else, ask user to make sure to choose a start and end date for the activity period
         } else {
           document.getElementById("resultstatus").textContent = "Please select an activity period " +
@@ -305,15 +305,15 @@
 
 
       /*
-      * Function that updates the waiting time on the page while the user waits for Aircall 
+      * Function that updates the waiting time on the page while the user waits for Aircall
       * API call to search for calls during a specific activity period.
       */
       function pollResults (n) {
         // If the results have not yet been displayed...
         if (!results_finished) {
-          document.getElementById("resultstatus").textContent = "Waiting response for " + 
+          document.getElementById("resultstatus").textContent = "Waiting response for " +
             n + " seconds...";
-          
+
           // Go to sleep for 5 seconds and check again
           setTimeout(pollResults, 5000, (n+5));
         }
@@ -333,7 +333,7 @@
         if ((typeof response_data) == "string") {
           // Display the message in the sidebar
           document.getElementById("resultstatus").textContent = response_data;
-        
+
         // ..., else, we successfully received results...
         } else {
           // Display the dynamic search box
@@ -393,7 +393,7 @@
               // If the "user" search input is empty, do not consider it in the search...
               if (selected_users.length == 0) {
                 user_match = true;
-              
+
               // ..., else, we need to determine if any of the users included in the "user" search input
               // are found within this call...
               } else {
@@ -412,7 +412,7 @@
               if (selected_numbers.length == 0) {
                 number_match = true;
 
-              // ..., else, we need to determine if any of the numbers included in the "number" 
+              // ..., else, we need to determine if any of the numbers included in the "number"
               // search input are found within this call...
               } else {
                 if (call_data.calls[j].number) {
@@ -429,7 +429,7 @@
               // If the "direction" search input is empty, do not consider it in the search...
               if (selected_direction == "n_a") {
                 direction_match = true;
-              
+
               // ..., else, we need to determine if the direction set in the "direction" search input
               // matches the direction of the call...
               } else if (selected_direction == call_data.calls[j].direction) {
@@ -441,10 +441,10 @@
               // If the "asset" search input is empty, do not consider it in the search...
               if (selected_asset == "n_a") {
                 asset_match = true;
-              
+
               // ..., else, we need to determine if the asset set in the "asset" search input
               // exists within the call object...
-              } else if (selected_asset == "either" && 
+              } else if (selected_asset == "either" &&
               (call_data.calls[j].voicemail || call_data.calls[j].recording)) {
                 asset_match = true;
               } else if (selected_asset == "recording" && call_data.calls[j].recording) {
@@ -459,25 +459,25 @@
               if (selected_missedcall.length == 0) {
                 missed_match = true;
 
-              // ..., else if the "missed call" search input is "N/A", do not 
+              // ..., else if the "missed call" search input is "N/A", do not
               // consider it in the search...
               } else if (selected_missedcall[0].id == "n_a") {
                 missed_match = true;
-              
+
               // ..., else, an option was explicitly chosen...
               } else {
                 // If "not_missed" was chosen, simply check if the call has a
                 // 'null' missed call reason...
-                if (selected_missedcall[0].id == "not_missed" && 
+                if (selected_missedcall[0].id == "not_missed" &&
                 (!call_data.calls[j].missed_call_reason)) {
                   missed_match = true;
 
                 // ..., else if "missed" was chosen, simply check if the call has a
                 // non-empty missed call reason...
-                } else if (selected_missedcall[0].id == "missed" && 
+                } else if (selected_missedcall[0].id == "missed" &&
                 call_data.calls[j].missed_call_reason) {
                   missed_match = true;
-                
+
                 // ..., else if at least one missed call reason was chosen, check if the
                 // call's missed call reason matches at least one of the options...
                 } else if (call_data.calls[j].missed_call_reason) {
@@ -490,21 +490,21 @@
               }
 
               if (!missed_match) { continue; }
-              
-              // If the "duration" search input (either the operatior or the number) is empty, 
+
+              // If the "duration" search input (either the operatior or the number) is empty,
               // do not consider it in the search...
               if (selected_duration_op == "n_a" || (!selected_duration_num)) {
                 duration_match = true;
-              
+
               // ..., else if "greater" was chosen, check the call's duration to see if it
               // is greater than the chosen duration number...
-              } else if (selected_duration_op == "greater" && 
+              } else if (selected_duration_op == "greater" &&
               (call_data.calls[j].duration > parseInt(selected_duration_num))) {
                 duration_match = true;
-              
+
               // ..., else if "less" was chosen, check the call's duration to see if it
               // is less than the chosen duration number...
-              } else if (selected_duration_op == "less" && 
+              } else if (selected_duration_op == "less" &&
               (call_data.calls[j].duration < parseInt(selected_duration_num))) {
                 duration_match = true;
               }
@@ -514,7 +514,7 @@
               // If the "tags" search input is empty, do not consider it in the search...
               if (selected_tags.length == 0) {
                 tags_match = true;
-              
+
               // ..., else, at least one tag was chosen...
               } else {
                 // If the call has at least one tag...
@@ -535,7 +535,7 @@
 
               // If all the search parameters are met, include the call in the final list
               // of calls to display in the sidebar...
-              if (user_match && number_match && direction_match && asset_match && 
+              if (user_match && number_match && direction_match && asset_match &&
               missed_match && duration_match && tags_match) {
                 display = true;
               }
@@ -547,7 +547,7 @@
                 att = document.createAttribute("bgcolor");
                 att.value = "#006b51";
                 tr.setAttributeNode(att);
-                    
+
                 var td = document.createElement('td');
                 att = document.createAttribute("style");
                 att.value = "font-family:arial; color:white; " +
@@ -556,7 +556,7 @@
 
                 var text = document.createTextNode("Call ID " + call_data.calls[j].id.toString());
                 td.appendChild(text);
-                
+
                 // If the call has an assset link...
                 if (call_data.calls[j].asset) {
                   // Create an asset link button for users to click
@@ -593,30 +593,32 @@
 
                 var pre = document.createElement('pre');
 
-                var calls_str = JSON.stringify(call_data.calls[j], undefined, 2);
+                var calls_str = JSON.stringify(calls_data.calls[i], undefined, 2);
 
                 // If there is a "started_at" time, convert it to a human-readable string
                 if (calls_str.match(/"started_at": \d{10,},/gi)) {
                   var started_at = calls_str.match(/"started_at": \d{10,},/gi)[0].split(" ")[1].split(",")[0];
                   var started_at_time = new Date(started_at * 1000);
-                  calls_str = calls_str.replace(/"started_at": \d{10,},/gi, '"started_at": ' + started_at_time + ',');
+                  calls_str = calls_str.replace(/"started_at": \d{10,},/gi, '"started_at": "' + started_at_time + '",');
                 }
 
                 // If there is a "answered_at" time, convert it to a human-readable string
                 if (calls_str.match(/"answered_at": \d{10,},/gi)) {
                   var answered_at = calls_str.match(/"answered_at": \d{10,},/gi)[0].split(" ")[1].split(",")[0];
                   var answered_at_time = new Date(answered_at * 1000);
-                  calls_str = calls_str.replace(/"answered_at": \d{10,},/gi, '"answered_at": ' + answered_at_time + ',');
+                  calls_str = calls_str.replace(/"answered_at": \d{10,},/gi, '"answered_at": "' + answered_at_time + '",');
                 }
 
                 // If there is a "ended_at" time, convert it to a human-readable string
                 if (calls_str.match(/"ended_at": \d{10,},/gi)) {
                   var ended_at = calls_str.match(/"ended_at": \d{10,},/gi)[0].split(" ")[1].split(",")[0];
                   var ended_at_time = new Date(ended_at * 1000);
-                  calls_str = calls_str.replace(/"ended_at": \d{10,},/gi, '"ended_at": ' + ended_at_time + ',');
+                  calls_str = calls_str.replace(/"ended_at": \d{10,},/gi, '"ended_at": "' + ended_at_time + '",');
                 }
 
-                pre.textContent = calls_str;
+                var calls_str_json = JSON.parse(calls_str);
+
+                pre.textContent = JSON.stringify(calls_str_json, undefined, 2);
 
                 att = document.createAttribute("style");
                 pre.setAttributeNode(att);
@@ -625,7 +627,7 @@
                 tr.appendChild(td);
                 table.appendChild(tr);
 
-                // Create a row simply to divide this call from the next 
+                // Create a row simply to divide this call from the next
                 // call to be displayed
                 tr = document.createElement('tr');
                 td = document.createElement('td');
@@ -637,7 +639,7 @@
                 tr.appendChild(td);
                 table.appendChild(tr);
 
-                // Increase the counter to keep track of total number of calls that 
+                // Increase the counter to keep track of total number of calls that
                 // will be displayed
                 total_num_calls++;
               }
@@ -649,10 +651,10 @@
           results_div.appendChild(table);
 
           // Display the total number of calls summary
-          document.getElementById("callcount").display = ""; 
-          document.getElementById("callcount").textContent = "Total: " + 
+          document.getElementById("callcount").display = "";
+          document.getElementById("callcount").textContent = "Total: " +
             total_num_calls + " rows";
-          
+
           // Signal to the script that we have finished displaying the results
           results_finished = 1;
         }
@@ -671,7 +673,7 @@
           content.style.maxHeight = null;
           document.getElementsByClassName("header")[0]
             .getElementsByTagName("h5")[0].textContent = "Configure Search";
-        
+
         // ..., else, the box must be collapsed (minimized)...
         } else {
           content.style.maxHeight = content.scrollHeight + "px";
@@ -698,7 +700,7 @@
           var conMaxHeightStr = con.style.maxHeight;
           var conMaxHeight = conMaxHeightStr.substring(0, conMaxHeightStr.indexOf("px"));
           con.style.maxHeight = (parseInt(conMaxHeight) - parseInt(content.style.maxHeight)) + "px";
-          
+
           // Minimize the optional parameters box
           content.style.maxHeight = null;
         // ..., else, the box is collapsed (minimized)...
@@ -730,7 +732,7 @@
 
 
       /*
-      * Function that hides information from the call history depending on the text being 
+      * Function that hides information from the call history depending on the text being
       * searched (the dynamic search box).
       */
       function filterSearch() {
@@ -788,13 +790,13 @@
         // If the current number of calls being shown is already dynamically filtered...
         if (total_str.includes("Showing")) {
           //  Retrieve the total number of calls from the current string
-          total_num_calls = total_str.substring((total_str.indexOf("/ ")+2), 
+          total_num_calls = total_str.substring((total_str.indexOf("/ ")+2),
             total_str.indexOf(" rows"));
-        
+
         // ..., else the current number of calls has not yet been dynamically filtered...
         } else {
           // Retrieve the total number of calls from the current string
-          total_num_calls = total_str.substring((total_str.indexOf(": ")+2), 
+          total_num_calls = total_str.substring((total_str.indexOf(": ")+2),
             total_str.indexOf(" rows"));
         }
 
@@ -802,14 +804,14 @@
         if (!searchText.length) {
           // Show the standard string displaying the total number of calls (no dynamically filtered)
           // results
-          document.getElementById("callcount").textContent = "Total: " + 
+          document.getElementById("callcount").textContent = "Total: " +
             total_num_calls + " rows";
 
         // ..., else the user has typed in a keyword to search using the dynamic search box...
         } else {
           // Display how many calls are being shown as a result of the dynamic search filter vs. the
           // total number of calls (if there was no dynamic search filter)
-          document.getElementById("callcount").textContent = "Showing: " + 
+          document.getElementById("callcount").textContent = "Showing: " +
             counter + " / " + total_num_calls + " rows";
         }
       }
@@ -861,7 +863,7 @@
               str.replace(/<\/span>/gi, "");
               pre.innerHTML = str;
             }
-          } 
+          }
         }
       }
 
@@ -874,7 +876,7 @@
         // Change the style of the highlight button
         document.getElementById("highlight").value = "Highlight (Off)";
         document.getElementById("highlight").style.backgroundColor = "#006b51";
-      
+
       // ... else, something is already highlighted...
       } else {
         // Change the style of the highlight button
@@ -896,7 +898,7 @@
         document.getElementById('callHistory').removeEventListener('mouseup', copyToSearch, false);
         document.getElementById("autosearch").value = "Auto-Search";
         document.getElementById("autosearch").style.backgroundColor = "";
-      
+
       // ... else, auto-search is currently disabled...
       } else {
         // Enable it and change the style of the auto-search button
@@ -924,25 +926,25 @@
     <div class="card card-signin my-5" style="width: 85%; margin: auto;">
       <div class="card-body">
         <div class="header">
-          <h5 class="card-title text-center" 
-          style="font-size: 16px; font-weight: bold; margin: auto; padding: 5px" 
+          <h5 class="card-title text-center"
+          style="font-size: 16px; font-weight: bold; margin: auto; padding: 5px"
           onclick="collapseSearch()">Configure Search</h5>
         </div>
         <div class="content">
         <form id="form_container">
           <br>
           <div style="font-size: 14px; padding: 0px 0px 5px 0px">Activity Period</div>
-          <input id="flatpickr" 
+          <input id="flatpickr"
           style="outline: none; border-radius: 5px; border: 1px solid #a6a6a6; width: 100%; height: 36px">
           <br><br>
-          <div class="header_options" 
-          style="font-size: 14px; padding: 0px 0px 5px 0px; font-weight: bold" 
+          <div class="header_options"
+          style="font-size: 14px; padding: 0px 0px 5px 0px; font-weight: bold"
           onclick="collapseSearchOptions()">Optionals</div>
           <br>
           <div class="content_options">
             <div class="form-label-group">
               <div style="font-size: 14px; padding: 0px 0px 5px 0px">Users</div>
-              <select id="user_selection" class="js-example-basic-multiple" 
+              <select id="user_selection" class="js-example-basic-multiple"
               name="users[]" multiple="multiple" style="width: 100%">
                 <?
                   // Gather all the user information that maps User ID to Username
@@ -959,7 +961,7 @@
             <br>
             <div class="form-label-group">
               <div style="font-size: 14px; padding: 0px 0px 5px 0px">Numbers</div>
-              <select id="number_selection" class="js-example-basic-multiple" 
+              <select id="number_selection" class="js-example-basic-multiple"
               name="numbers[]" multiple="multiple" style="width: 100%">
                 <?
                   // Gather all the number information that maps Number ID to Number Name
@@ -990,7 +992,7 @@
             </select>
             <div class="form-label-group">
               <br><div style="font-size: 14px; padding: 0px 0px 5px 0px">Missed Call</div>
-              <select id="missed_call" class="js-example-basic-multiple" name="missed_call" 
+              <select id="missed_call" class="js-example-basic-multiple" name="missed_call"
               multiple="multiple" style="width: 100%">
                 <option groupid="a" value="n_a">N/A</option>
                 <option groupid="b" value="not_missed">Not a missed call</option>
@@ -1010,11 +1012,11 @@
               <option value="greater">&gt;</option>
               <option value="less">&lt;</option>
             </select>
-            <input type="text" class="inputbox" id="duration_num" onkeyup="checkNum()" 
+            <input type="text" class="inputbox" id="duration_num" onkeyup="checkNum()"
             placeholder="(in seconds)" style="width: 65%">
             <div class="form-label-group">
               <br><div style="font-size: 14px; padding: 0px 0px 5px 0px">Tags</div>
-              <select id="tags" class="js-example-basic-multiple" name="tags" multiple="multiple" 
+              <select id="tags" class="js-example-basic-multiple" name="tags" multiple="multiple"
               style="width: 100%">
               </select>
             </div>
@@ -1027,12 +1029,12 @@
     </div>
     <div id="resultstatus" style="text-align: center; font-size: 14px; width: 80%; margin: auto"></div>
     <div style="padding: 0px 0px 0px 8px">
-      <input type="text" id="searchBox" onkeyup="filterSearch()" 
+      <input type="text" id="searchBox" onkeyup="filterSearch()"
       placeholder="Search for keywords..." style="display: none">
       <br><br>
-      <input type="button" class="highlightbutton" id="highlight" value="Highlight" 
+      <input type="button" class="highlightbutton" id="highlight" value="Highlight"
       onclick="highlightText()" style="display: none" />
-      <input type="button" class="autosearchbutton" id="autosearch" value="Auto-Search" 
+      <input type="button" class="autosearchbutton" id="autosearch" value="Auto-Search"
       onclick="autoSearch()" style="display: none" />
     </div>
     <br>
@@ -1101,7 +1103,7 @@
             } else {
               // If the current option is enabled, or there are going to be no more
               // selected options if we re-enable this option...
-              if (!$("option[value='" + option_val + "']").attr('disabled') || 
+              if (!$("option[value='" + option_val + "']").attr('disabled') ||
               (($("#missed_call").select2('data').length - 1) == 0)) {
                 // This special condition is put in place to make sure that if there
                 // is at least one option (that belongs to a multi-member group) selected,
@@ -1119,7 +1121,7 @@
 
       // Initializes the calendar picker plugin in the sidebar (provided by flatpickr)
       selected_dates = flatpickr('#flatpickr', {
-        enableTime: true, 
+        enableTime: true,
         enableSeconds: true,
         defaultHour: 0,
         mode: "range"
