@@ -111,9 +111,10 @@
           }
         }
 
-        google.script.run.setConfigParams(interval, api_key, user_interval,
+        google.script.run.withSuccessHandler(response_data => {
+            google.script.host.close();
+          }).setConfigParams(interval, api_key, user_interval,
           team_interval, wait_lvl_1, wait_lvl_2, sla, filtered_teams);
-        google.script.host.close();
       }
 
       /*
