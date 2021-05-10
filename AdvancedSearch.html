@@ -593,7 +593,7 @@
 
                 var pre = document.createElement('pre');
 
-                var calls_str = JSON.stringify(calls_data.calls[i], undefined, 2);
+                var calls_str = JSON.stringify(call_data.calls[j], undefined, 2);
 
                 // If there is a "started_at" time, convert it to a human-readable string
                 if (calls_str.match(/"started_at": \d{10,},/gi)) {
